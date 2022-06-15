@@ -9,10 +9,6 @@ def convert_recipe(dom: ET._ElementTree) -> ET._XSLTResultTree:
     xslt = ET.parse(Path(__file__).parent.parent / "data/recipe.xsl")
     transform = ET.XSLT(xslt)
     new_dom = transform(dom)
-
-    with open(Path(__file__).parent.parent / "data/tranformed.xml", "wb") as file:
-        file.write(ET.tostring(new_dom, pretty_print=True))
-
     return new_dom
 
 
@@ -22,6 +18,8 @@ def convert_recipe_from_file(path: Union[Path, str]) -> ET._ElementTree:
 
 
 if __name__ == "__main__":
-    convert_recipe_from_file(
+    recipe = convert_recipe_from_file(
         Path(__file__).parent.parent / "data/'9os_Style_Chicken_Salad.xml"
     )
+    with open(Path(__file__).parent.parent / "data/tranformed.xml", "wb") as file:
+        file.write(ET.tostring(recipe, pretty_print=True))

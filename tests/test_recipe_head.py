@@ -24,4 +24,35 @@ def test_title_is_correct() -> None:
     title = "Recipe Title"
     recipe_ml = E.recipeml(E.recipe(E.head(E.title(title))))
     my_cookbook_xml = convert_recipe(recipe_ml)
-    assert my_cookbook_xml.xpath("string(recipe/title)") == title
+    assert len(my_cookbook_xml.xpath("recipe/title")) == 1
+    assert my_cookbook_xml.xpath("recipe/title")[0].text == title
+
+
+def test_no_categories() -> None:
+    """Assert no category tags are created when there are no categories."""
+    recipe_ml = E.recipeml(E.recipe(E.head()))
+    my_cookbook_xml = convert_recipe(recipe_ml)
+    assert not my_cookbook_xml.xpath("recipe/category")
+
+
+def test_categories_created() -> None:
+    """Assert the right number of categories are created."""
+    categories = 2
+    recipe_ml = E.recipeml(
+        E.recipe(E.head(E.categories(*[E.cat() for _ in range(categories)])))
+    )
+    my_cookbook_xml = convert_recipe(recipe_ml)
+    assert len(my_cookbook_xml.xpath("recipe/category")) == categories
+
+
+def test_categories_are_correct() -> None:
+    """Assert the categories have the right values."""
+    categories = ["Category 1", "Category 2"]
+    recipe_ml = E.recipeml(
+        E.recipe(E.head(E.categories(*[E.cat(cat) for cat in categories])))
+    )
+    my_cookbook_xml = convert_recipe(recipe_ml)
+    category_elements = my_cookbook_xml.xpath("recipe/category")
+
+    for i, cat in enumerate(categories):
+        assert cat == category_elements[i].text
