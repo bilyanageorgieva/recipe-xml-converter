@@ -78,15 +78,8 @@
         </recipetext>
     </xsl:template>
 
-    <!-- split the recipe steps by double empty lines -->
-    <xsl:template match="step" name="split">
-        <xsl:param name="pText" select="."/>
-        <xsl:if test="$pText">
-            <li><xsl:value-of select="normalize-space(substring-before(concat($pText,'&#xa;&#xa;'),'&#xa;&#xa;'))"/></li>
-            <xsl:call-template name="split">
-                <xsl:with-param name="pText" select="substring-after($pText, '&#xa;&#xa;')"/>
-            </xsl:call-template>
-        </xsl:if>
+    <xsl:template match="step">
+        <li><xsl:value-of select="normalize-space()"/></li>
     </xsl:template>
     <!-- end directions -->
 </xsl:stylesheet>
