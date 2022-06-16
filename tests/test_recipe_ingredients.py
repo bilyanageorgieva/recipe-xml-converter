@@ -18,7 +18,7 @@ def test_correct_number_of_ingredients() -> None:
         (E.ing(E.amt(E.qty("2"), E.unit()), E.item("apples")), "2 apples"),
         (E.ing(E.amt(E.qty("3")), E.item("oranges")), "3 oranges"),
         (E.ing(E.amt(E.qty("5"), E.unit("cups")), E.item("water")), "5 cups water"),
-    ]
+    ],
 )
 def test_ingredient_is_correct(ingredient_element: E, ingredient_text: str) -> None:
     """Assert the ingredients have the right values."""

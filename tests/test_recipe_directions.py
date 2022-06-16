@@ -14,13 +14,20 @@ def test_correct_number_of_steps() -> None:
 def test_steps_are_correct() -> None:
     """Assert the steps have the right values."""
     steps = ["Step 1", "Step 2"]
-    recipe_ml = E.recipeml(
-        E.recipe(E.directions(*[E.step(step) for step in steps]))
-    )
+    recipe_ml = E.recipeml(E.recipe(E.directions(*[E.step(step) for step in steps])))
     my_cookbook_xml = convert_recipe(recipe_ml)
     step_elements = my_cookbook_xml.xpath("recipe/recipetext/li")
 
     for i, cat in enumerate(steps):
         assert cat == step_elements[i].text
 
-# TODO: add tests for correct formatting in case of many blank lines
+
+def test_two_blank_lines_split() -> None:
+    """Assert that two blank lines split a step into two and extra spaces are removed."""
+    recipe_ml = E.recipeml(E.recipe(E.directions(E.step(" Step 1\n\n Step 2 "))))
+    my_cookbook_xml = convert_recipe(recipe_ml)
+    step_elements = my_cookbook_xml.xpath("recipe/recipetext/li")
+
+    assert len(step_elements) == 2
+    assert step_elements[0].text == "Step 1"
+    assert step_elements[1].text == "Step 2"
