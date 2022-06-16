@@ -1,4 +1,3 @@
-from lxml import etree as ET
 from lxml.builder import E
 
 from recipe_xml_converter.converter import convert_recipe
@@ -6,8 +5,7 @@ from recipe_xml_converter.converter import convert_recipe
 
 def test_title_exists() -> None:
     """Assert the title element exists."""
-    title = "Recipe Title"
-    recipe_ml = E.recipeml(E.recipe(E.head(E.title(title))))
+    recipe_ml = E.recipeml(E.recipe(E.head(E.title("Recipe Title"))))
     my_cookbook_xml = convert_recipe(recipe_ml)
     assert my_cookbook_xml.xpath("recipe/title")
 
@@ -56,3 +54,19 @@ def test_categories_are_correct() -> None:
 
     for i, cat in enumerate(categories):
         assert cat == category_elements[i].text
+
+
+def test_no_yield() -> None:
+    """Assert no quantity tags are created when there is no yield."""
+    recipe_ml = E.recipeml(E.recipe(E.head()))
+    my_cookbook_xml = convert_recipe(recipe_ml)
+    assert not my_cookbook_xml.xpath("recipe/quantity")
+
+
+def test_yield_is_correct() -> None:
+    """Assert the quantity is correct."""
+    yield_ = "12"
+    recipe_ml = E.recipeml(E.recipe(E.head(E("yield", yield_))))
+    my_cookbook_xml = convert_recipe(recipe_ml)
+    quantity = my_cookbook_xml.xpath("recipe/quantity")
+    assert quantity[0].text == yield_
