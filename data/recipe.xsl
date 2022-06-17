@@ -5,11 +5,16 @@
 
     <xsl:template match="/">
         <cookbook version="46">
-            <source>
-                <xsl:apply-templates select="recipeml/meta[contains('DC.Creator DC.Source DC.Identifier DC.Publisher DC.Date DC.Rights', @name)]"/>
-            </source>
             <xsl:apply-templates select="recipeml/recipe"/>
+            <xsl:call-template name="source"/>
         </cookbook>
+    </xsl:template>
+
+    <xsl:template name="source">
+        <source>
+            <xsl:apply-templates select="recipeml/meta[contains('DC.Creator DC.Source DC.Identifier DC.Publisher DC.Date DC.Rights', @name)]"/>
+            <xsl:apply-templates select="recipeml/recipe/head/source"/>
+        </source>
     </xsl:template>
 
     <xsl:template match="meta[contains('DC.Creator DC.Source DC.Identifier DC.Publisher DC.Date DC.Rights', @name)]">
@@ -51,6 +56,11 @@
     <xsl:template match="yield">
         <quantity><xsl:value-of select="."/></quantity>
     </xsl:template>
+
+    <xsl:template match="source">
+        <li><xsl:apply-templates/></li>
+    </xsl:template>
+
     <!-- end head -->
 
     <!-- ingredients -->

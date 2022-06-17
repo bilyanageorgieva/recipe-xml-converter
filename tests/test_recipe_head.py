@@ -135,3 +135,34 @@ def test_yield_is_correct() -> None:
     my_cookbook_xml = convert_recipe(recipe_ml)
     quantity = my_cookbook_xml.xpath("recipe/quantity")
     assert quantity[0].text == yield_
+
+
+def test_recipe_source_exists() -> None:
+    """Assert the recipe source element exists."""
+    recipe_ml = E.recipeml(E.recipe(E.head(E.source())))
+    my_cookbook_xml = convert_recipe(recipe_ml)
+    assert len(my_cookbook_xml.xpath("source/li")) == 1
+
+
+@pytest.mark.parametrize(
+    "element,text",
+    [
+        (E.source("Some source"), "Some source"),
+        (E.source("Original ", E.srcitem("Source")), "Original Source"),
+        (
+            E.source(
+                "Original ",
+                E.srcitem("Lays ", E.span("Chips"), type="DC.Creator"),
+                " created on ",
+                E.srcitem("12.03.2020", type="DC.Date"),
+            ),
+            "Original Lays Chips created on 12.03.2020",
+        ),
+    ],
+)
+def test_recipe_source_is_correct(element: E, text: str) -> None:
+    """Assert the recipe source element has the correct value."""
+    recipe_ml = E.recipeml(E.recipe(E.head(element)))
+    my_cookbook_xml = convert_recipe(recipe_ml)
+    assert len(my_cookbook_xml.xpath("source/li")) == 1
+    assert my_cookbook_xml.xpath("source/li")[0].text == text
