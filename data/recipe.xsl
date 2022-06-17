@@ -5,8 +5,19 @@
 
     <xsl:template match="/">
         <cookbook version="46">
+            <source>
+                <xsl:apply-templates select="recipeml/meta[contains('DC.Creator DC.Source DC.Identifier DC.Publisher DC.Date DC.Rights', @name)]"/>
+            </source>
             <xsl:apply-templates select="recipeml/recipe"/>
         </cookbook>
+    </xsl:template>
+
+    <xsl:template match="meta[contains('DC.Creator DC.Source DC.Identifier DC.Publisher DC.Date DC.Rights', @name)]">
+        <li>
+            <xsl:value-of select="substring-after(@name, 'DC.')"/>
+            <xsl:text>: </xsl:text>
+            <xsl:value-of select="@content"/>
+        </li>
     </xsl:template>
 
     <xsl:template match="recipe">
