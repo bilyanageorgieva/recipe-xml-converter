@@ -1,4 +1,5 @@
 from lxml.builder import E
+import pytest
 
 from recipe_xml_converter.converter import convert_recipe
 
@@ -17,13 +18,37 @@ def test_title_exists_without_value() -> None:
     assert my_cookbook_xml.xpath("recipe/title")
 
 
-def test_title_is_correct() -> None:
+@pytest.mark.parametrize(
+    "element,text",
+    [
+        (E.title("Original Title"), "Original Title"),
+        (E.title("Original ", E.span("Title")), "Original Title"),
+        (
+            E.title(
+                "Original ",
+                E.brandname("Lays ", E.span("Chips")),
+                " for ",
+                E.span(E.frac(E.n("3"), E.sep(" to "), E.d("4")), " people"),
+            ),
+            "Original Lays Chips for 3 to 4 people",
+        ),
+        (
+            E.title(
+                "Original ",
+                E.brandname("Lays ", E.span("Chips")),
+                " for ",
+                E.span(E.frac(E.n("3"), E.d("4")), " people"),
+            ),
+            "Original Lays Chips for 3/4 people",
+        ),
+    ],
+)
+def test_title_is_correct(element: E, text: str) -> None:
     """Assert the title has correct value."""
-    title = "Recipe Title"
-    recipe_ml = E.recipeml(E.recipe(E.head(E.title(title))))
+    recipe_ml = E.recipeml(E.recipe(E.head(element)))
     my_cookbook_xml = convert_recipe(recipe_ml)
     assert len(my_cookbook_xml.xpath("recipe/title")) == 1
-    assert my_cookbook_xml.xpath("recipe/title")[0].text == title
+    assert my_cookbook_xml.xpath("recipe/title")[0].text == text
 
 
 def test_no_categories() -> None:

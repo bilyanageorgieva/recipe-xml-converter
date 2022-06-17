@@ -30,9 +30,13 @@
 
     <!-- head -->
     <xsl:template match="head">
-        <title><xsl:value-of select="title"/></title>
+        <xsl:apply-templates select="title"/>
         <xsl:apply-templates select="categories/cat"/>
         <xsl:apply-templates select="yield"/>
+    </xsl:template>
+
+    <xsl:template match="title">
+        <title><xsl:apply-templates/></title>
     </xsl:template>
 
     <xsl:template match="cat">
@@ -46,9 +50,7 @@
 
     <!-- ingredients -->
     <xsl:template match="ingredients">
-        <ingredient>
-            <xsl:apply-templates select="ing"/>
-        </ingredient>
+        <ingredient><xsl:apply-templates select="ing"/></ingredient>
     </xsl:template>
 
     <xsl:template match="ing">
@@ -100,4 +102,25 @@
         </xsl:if>
     </xsl:template>
     <!-- end directions -->
+
+    <xsl:template match="brandname">
+        <xsl:apply-templates/>
+    </xsl:template>
+
+    <xsl:template match="span|mfr|product" name="inline-class">
+        <xsl:apply-templates/>
+    </xsl:template>
+
+    <xsl:template match="frac">
+        <xsl:value-of select="n"/>
+        <xsl:apply-templates select="sep"/>
+        <xsl:if test="not(sep)">
+            <xsl:text>/</xsl:text>
+        </xsl:if>
+        <xsl:value-of select="d"/>
+    </xsl:template>
+
+    <xsl:template match="sep">
+        <xsl:value-of select="."/>
+    </xsl:template>
 </xsl:stylesheet>
