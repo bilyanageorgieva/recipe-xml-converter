@@ -31,12 +31,17 @@
     <!-- head -->
     <xsl:template match="head">
         <xsl:apply-templates select="title"/>
+        <xsl:apply-templates select="subtitle"/>
         <xsl:apply-templates select="categories/cat"/>
         <xsl:apply-templates select="yield"/>
     </xsl:template>
 
     <xsl:template match="title">
         <title><xsl:apply-templates/></title>
+    </xsl:template>
+
+    <xsl:template match="subtitle">
+        <description><xsl:apply-templates/></description>
     </xsl:template>
 
     <xsl:template match="cat">
