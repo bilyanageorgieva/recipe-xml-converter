@@ -1,5 +1,5 @@
-from lxml.builder import E
 import pytest
+from lxml.builder import E
 
 from recipe_xml_converter.converter import convert_recipe
 
@@ -56,39 +56,6 @@ def test_title_is_correct(element: E, text: str) -> None:
     my_cookbook_xml = convert_recipe(recipe_ml)
     assert len(my_cookbook_xml.xpath("recipe/title")) == 1
     assert my_cookbook_xml.xpath("recipe/title")[0].text == text
-
-
-@pytest.mark.parametrize(
-    "element,text",
-    [
-        (E.subtitle("Original Title"), "Original Title"),
-        (E.subtitle("Original ", E.span("Title")), "Original Title"),
-        (
-            E.subtitle(
-                "Original ",
-                E.brandname("Lays ", E.span("Chips")),
-                " for ",
-                E.span(E.frac(E.n("3"), E.sep(" to "), E.d("4")), " people"),
-            ),
-            "Original Lays Chips for 3 to 4 people",
-        ),
-        (
-            E.subtitle(
-                "Original ",
-                E.brandname("Lays ", E.span("Chips")),
-                " for ",
-                E.span(E.frac(E.n("3"), E.d("4")), " people"),
-            ),
-            "Original Lays Chips for 3/4 people",
-        ),
-    ],
-)
-def test_title_is_correct(element: E, text: str) -> None:
-    """Assert the title has correct value."""
-    recipe_ml = E.recipeml(E.recipe(E.head(element)))
-    my_cookbook_xml = convert_recipe(recipe_ml)
-    assert len(my_cookbook_xml.xpath("recipe/description")) == 1
-    assert my_cookbook_xml.xpath("recipe/description")[0].text == text
 
 
 def test_no_categories() -> None:
@@ -166,3 +133,46 @@ def test_recipe_source_is_correct(element: E, text: str) -> None:
     my_cookbook_xml = convert_recipe(recipe_ml)
     assert len(my_cookbook_xml.xpath("source/li")) == 1
     assert my_cookbook_xml.xpath("source/li")[0].text == text
+
+
+@pytest.mark.parametrize(
+    "element,destination,text",
+    [
+        (
+            E.preptime(E.time(E.qty("1"), E.timeunit("hour")), type="preparation"),
+            "recipe/preptime",
+            "1 hour",
+        ),
+        (
+            E.preptime(
+                E.time(
+                    E.range(E.q1("1"), E.sep(" to "), E.q2("2")), E.timeunit("hours")
+                ),
+                type="preparation",
+            ),
+            "recipe/preptime",
+            "1 to 2 hours",
+        ),
+        (
+            E.preptime(E.time(E.qty("1"), E.timeunit("hour")), type="cooking"),
+            "recipe/cooktime",
+            "1 hour",
+        ),
+        (
+            E.preptime(
+                E.time(
+                    E.range(E.q1("1"), E.sep(" to "), E.q2("2")), E.timeunit("hours")
+                ),
+                type="cooking",
+            ),
+            "recipe/cooktime",
+            "1 to 2 hours",
+        ),
+    ],
+)
+def test_prep_time(element, destination, text) -> None:
+    """Assert the prep time is transformed correctly."""
+    recipe_ml = E.recipeml(E.recipe(E.head(element)))
+    my_cookbook_xml = convert_recipe(recipe_ml)
+    assert len(my_cookbook_xml.xpath(destination)) == 1
+    assert my_cookbook_xml.xpath(destination)[0].text == text

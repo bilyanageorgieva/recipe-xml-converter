@@ -1,5 +1,5 @@
-from lxml.builder import E
 import pytest
+from lxml.builder import E
 
 from recipe_xml_converter.converter import convert_recipe
 

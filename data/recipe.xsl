@@ -39,6 +39,7 @@
         <xsl:apply-templates select="subtitle"/>
         <xsl:apply-templates select="categories/cat"/>
         <xsl:apply-templates select="yield"/>
+        <xsl:apply-templates select="preptime"/>
     </xsl:template>
 
     <xsl:template match="title">
@@ -61,6 +62,21 @@
         <li><xsl:apply-templates/></li>
     </xsl:template>
 
+    <xsl:template match="preptime">
+        <xsl:choose>
+            <xsl:when test="@type='preparation'">
+                <preptime>
+                    <xsl:apply-templates/>
+                </preptime>
+            </xsl:when>
+            <xsl:when test="@type='cooking'">
+                <cooktime>
+                    <xsl:apply-templates/>
+                </cooktime>
+            </xsl:when>
+        </xsl:choose>
+    </xsl:template>
+
     <!-- end head -->
 
     <!-- ingredients -->
@@ -71,6 +87,7 @@
     <xsl:template match="ing">
         <li>
             <xsl:apply-templates select="amt"/>
+            <xsl:text> </xsl:text>
             <xsl:apply-templates select="item"/>
         </li>
     </xsl:template>
@@ -78,25 +95,12 @@
     <!-- amount -->
     <xsl:template match="amt">
         <xsl:apply-templates select="qty"/>
-        <xsl:apply-templates select="unit"/>
-    </xsl:template>
-
-    <xsl:template match="qty">
-        <xsl:value-of select="."/>
-        <xsl:text> </xsl:text>
-    </xsl:template>
-
-    <xsl:template match="unit">
-        <xsl:value-of select="."/>
-        <xsl:if test="string(.)">
+        <xsl:if test="qty and unit and qty/text() and unit/text()">
             <xsl:text> </xsl:text>
         </xsl:if>
+        <xsl:apply-templates select="unit"/>
     </xsl:template>
     <!-- end amount -->
-
-    <xsl:template match="item">
-        <xsl:value-of select="."/>
-    </xsl:template>
     <!-- end ingredients -->
 
     <!-- directions -->
@@ -118,11 +122,35 @@
     </xsl:template>
     <!-- end directions -->
 
+    <xsl:template match="time">
+        <xsl:apply-templates select="qty"/>
+        <xsl:apply-templates select="range"/>
+        <xsl:text> </xsl:text>
+        <xsl:apply-templates select="timeunit"/>
+    </xsl:template>
+
+    <xsl:template match="qty">
+        <xsl:apply-templates/>
+    </xsl:template>
+
     <xsl:template match="brandname">
         <xsl:apply-templates/>
     </xsl:template>
 
     <xsl:template match="span|mfr|product" name="inline-class">
+        <xsl:apply-templates/>
+    </xsl:template>
+
+    <xsl:template match="range">
+        <xsl:apply-templates select="q1"/>
+        <xsl:apply-templates select="sep"/>
+        <xsl:if test="not(sep)">
+            <xsl:text>/</xsl:text>
+        </xsl:if>
+        <xsl:apply-templates select="q2"/>
+    </xsl:template>
+
+    <xsl:template match="q1|q2">
         <xsl:apply-templates/>
     </xsl:template>
 
@@ -135,7 +163,7 @@
         <xsl:value-of select="d"/>
     </xsl:template>
 
-    <xsl:template match="sep">
+    <xsl:template match="timeunit|tempunit|sep|unit|item">
         <xsl:value-of select="."/>
     </xsl:template>
 </xsl:stylesheet>
