@@ -81,7 +81,13 @@
 
     <!-- ingredients -->
     <xsl:template match="ingredients">
-        <ingredient><xsl:apply-templates select="ing"/></ingredient>
+        <ingredient>
+            <xsl:apply-templates select="note|ing"/>
+        </ingredient>
+    </xsl:template>
+
+    <xsl:template match="note">
+        <li><xsl:apply-templates/></li>
     </xsl:template>
 
     <xsl:template match="ing">
@@ -92,15 +98,13 @@
         </li>
     </xsl:template>
 
-    <!-- amount -->
     <xsl:template match="amt">
-        <xsl:apply-templates select="qty"/>
-        <xsl:if test="qty and unit and qty/text() and unit/text()">
+        <xsl:apply-templates select="qty|range"/>
+        <xsl:if test="(qty|range)//text() and (qty|range)/following-sibling::*//text()">
             <xsl:text> </xsl:text>
         </xsl:if>
         <xsl:apply-templates select="unit"/>
     </xsl:template>
-    <!-- end amount -->
     <!-- end ingredients -->
 
     <!-- directions -->
@@ -129,6 +133,13 @@
         <xsl:apply-templates select="timeunit"/>
     </xsl:template>
 
+    <xsl:template match="temp">
+        <xsl:apply-templates select="qty"/>
+        <xsl:apply-templates select="range"/>
+        <xsl:text> </xsl:text>
+        <xsl:apply-templates select="tempunit"/>
+    </xsl:template>
+
     <xsl:template match="qty">
         <xsl:apply-templates/>
     </xsl:template>
@@ -145,7 +156,7 @@
         <xsl:apply-templates select="q1"/>
         <xsl:apply-templates select="sep"/>
         <xsl:if test="not(sep)">
-            <xsl:text>/</xsl:text>
+            <xsl:text> - </xsl:text>
         </xsl:if>
         <xsl:apply-templates select="q2"/>
     </xsl:template>

@@ -1,5 +1,5 @@
-from lxml.builder import E
 import pytest
+from lxml.builder import E
 
 from recipe_xml_converter.converter import convert_recipe
 
@@ -18,6 +18,29 @@ def test_correct_number_of_ingredients() -> None:
         (E.ing(E.amt(E.qty("2"), E.unit()), E.item("apples")), "2 apples"),
         (E.ing(E.amt(E.qty("3")), E.item("oranges")), "3 oranges"),
         (E.ing(E.amt(E.qty("5"), E.unit("cups")), E.item("water")), "5 cups water"),
+        (
+            E.ing(
+                E.amt(E.qty(E.frac(E.n("1"), E.d("2"))), E.unit("cup")), E.item("water")
+            ),
+            "1/2 cup water",
+        ),
+        (
+            E.ing(
+                E.amt(E.qty(E.range(E.q1("1"), E.q2("2"))), E.unit("cups")),
+                E.item("water"),
+            ),
+            "1 - 2 cups water",
+        ),
+        (
+            E.note(
+                "About ",
+                E.amt(E.qty("500"), E.unit("grams")),
+                " of ",
+                E.temp(E.qty("20"), E.tempunit("degree C")),
+                " butter",
+            ),
+            "About 500 grams of 20 degree C butter",
+        ),
     ],
 )
 def test_ingredient_is_correct(ingredient_element: E, ingredient_text: str) -> None:
