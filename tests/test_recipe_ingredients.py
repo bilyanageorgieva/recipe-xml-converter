@@ -179,6 +179,31 @@ def test_correct_number_of_ingredients() -> None:
             ),
             "bananas some 2 to 3 cups warm 1 - 2 cups 1 hour 1/2 cold",
         ),
+        # alt-ing
+        (
+            E.ing(
+                E.item("apples"),
+                E(
+                    "alt-ing",
+                    E.item("bananas"),
+                    E(
+                        "ing-note",
+                        "some ",
+                        E.size(
+                            E.range(E.q1("2"), E.sep(" to "), E.q2("3")),
+                            E.unit("cups"),
+                            " warm",
+                        ),
+                        E.amt(E.qty(E.range(E.q1("1"), E.q2("2"))), E.unit("cups")),
+                        E.time(E.qty("1"), E.timeunit("hour")),
+                        E.frac(E.n("1"), E.d("2")),
+                        " cold",
+                    ),
+                ),
+                E("alt-ing", E.item("coconut")),
+            ),
+            "apples or bananas some 2 to 3 cups warm 1 - 2 cups 1 hour 1/2 cold or coconut",
+        ),
         # note
         (
             E.note(

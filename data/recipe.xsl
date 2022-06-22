@@ -87,7 +87,14 @@
     </xsl:template>
 
     <xsl:template match="ing">
-        <li><xsl:call-template name="space-between-children"/></li>
+        <li>
+            <xsl:call-template name="space-between-children"/>
+        </li>
+    </xsl:template>
+
+    <xsl:template match="alt-ing">
+        <xsl:text>or </xsl:text>
+        <xsl:call-template name="space-between-children"/>
     </xsl:template>
     <!-- end ingredients -->
 
