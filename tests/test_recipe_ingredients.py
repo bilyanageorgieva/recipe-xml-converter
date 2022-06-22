@@ -32,6 +32,64 @@ def test_correct_number_of_ingredients() -> None:
             "1 - 2 cups water",
         ),
         (
+            E.ing(
+                E.amt(
+                    E.size(
+                        E.qty(E.frac(E.n("1"), E.d("2"))),
+                        E.unit("cup")
+                    ),
+                ),
+                E.item("water")
+            ),
+            "1/2 cup water",
+        ),
+        (
+            E.ing(
+                E.amt(
+                    E.size(
+                        "2/3 ",
+                        E.unit("cup")
+                    ),
+                ),
+                E.item("water")
+            ),
+            "2/3 cup water",
+        ),
+        (
+            E.ing(
+                E.amt(
+                    E.size(
+                        E.range(E.q1("2"), E.q2("3")),
+                        E.unit("cups"),
+                        " warm"
+                    ),
+                ),
+                E.item("water")
+            ),
+            "2 - 3 cups warm water",
+        ),
+        (
+            E.ing(
+                E.amt(
+                    E.qty(E.frac(E.n("1"), E.d("2"))),
+                    E.size(
+                        E.range(E.q1("2"), E.q2("3")),
+                        E.unit("cups"),
+                        " warm"
+                    ),
+                    E.unit("cups"),
+                    E.size(
+                        E.qty(E.frac(E.n("4"), E.d("8"))),
+                        E.range(E.q1("7"), E.q2("3")),
+                        E.unit("cups"),
+                        " cold"
+                    ),
+                ),
+                E.item("water")
+            ),
+            "1/2 2 - 3 cups warm cups 4/8 7 - 3 cups cold water",
+        ),
+        (
             E.note(
                 "About ",
                 E.amt(E.qty("500"), E.unit("grams")),

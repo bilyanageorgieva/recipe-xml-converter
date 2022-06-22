@@ -99,11 +99,22 @@
     </xsl:template>
 
     <xsl:template match="amt">
-        <xsl:apply-templates select="qty|range"/>
-        <xsl:if test="(qty|range)//text() and (qty|range)/following-sibling::*//text()">
+        <xsl:for-each select="qty|range|size|unit">
+            <xsl:call-template name="apply-and-space"/>
+        </xsl:for-each>
+    </xsl:template>
+
+    <xsl:template match="size">
+        <xsl:for-each select="text()|qty|range|unit">
+            <xsl:call-template name="apply-and-space"/>
+        </xsl:for-each>
+    </xsl:template>
+
+    <xsl:template name="apply-and-space">
+        <xsl:apply-templates select="."/>
+        <xsl:if test=".//text() and ./following-sibling::*//text()">
             <xsl:text> </xsl:text>
         </xsl:if>
-        <xsl:apply-templates select="unit"/>
     </xsl:template>
     <!-- end ingredients -->
 
