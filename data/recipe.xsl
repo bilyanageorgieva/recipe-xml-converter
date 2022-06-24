@@ -10,13 +10,7 @@
         </cookbook>
     </xsl:template>
 
-    <xsl:template name="source">
-        <source>
-            <xsl:apply-templates select="recipeml/meta[contains('DC.Creator DC.Source DC.Identifier DC.Publisher DC.Date DC.Rights', @name)]"/>
-            <xsl:apply-templates select="recipeml/recipe/head/source"/>
-        </source>
-    </xsl:template>
-
+    <!--  meta  -->
     <xsl:template match="meta[contains('DC.Creator DC.Source DC.Identifier DC.Publisher DC.Date DC.Rights', @name)]">
         <li>
             <xsl:value-of select="substring-after(@name, 'DC.')"/>
@@ -25,6 +19,15 @@
         </li>
     </xsl:template>
 
+    <xsl:template name="source">
+        <source>
+            <xsl:apply-templates select="recipeml/meta[contains('DC.Creator DC.Source DC.Identifier DC.Publisher DC.Date DC.Rights', @name)]"/>
+            <xsl:apply-templates select="recipeml/recipe/head/source"/>
+        </source>
+    </xsl:template>
+    <!--  end meta  -->
+
+    <!--  recipe  -->
     <xsl:template match="recipe">
         <recipe>
             <xsl:apply-templates select="head"/>
@@ -76,7 +79,6 @@
             </xsl:when>
         </xsl:choose>
     </xsl:template>
-
     <!-- end head -->
 
     <!-- ingredients -->
@@ -120,8 +122,8 @@
         </recipetext>
     </xsl:template>
 
-    <!-- split the recipe steps by double empty lines -->
     <xsl:template match="step" name="split">
+        <!-- split the recipe steps by double empty lines -->
         <xsl:param name="pText" select="."/>
         <xsl:if test="$pText">
             <li><xsl:value-of select="normalize-space(substring-before(concat($pText,'&#xa;&#xa;'),'&#xa;&#xa;'))"/></li>
@@ -132,6 +134,7 @@
     </xsl:template>
     <!-- end directions -->
 
+    <!--  common formatting  -->
     <xsl:template match="amt|size|modifier|time|temp|prep|qty|brandname|span|mfr|product|q1|q2|ing-note|title|description" name="space-between-children">
         <xsl:for-each select="text()|*">
             <xsl:apply-templates select="."/>
@@ -162,4 +165,6 @@
         </xsl:if>
         <xsl:value-of select="d"/>
     </xsl:template>
+    <!--  end common formatting  -->
+    <!--  end recipe  -->
 </xsl:stylesheet>
