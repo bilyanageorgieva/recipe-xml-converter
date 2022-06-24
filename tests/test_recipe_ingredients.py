@@ -222,3 +222,123 @@ def test_ingredient_is_correct(ingredient_element: E, ingredient_text: str) -> N
     recipe_ml = E.recipeml(E.recipe(E.ingredients(ingredient_element)))
     my_cookbook_xml = convert_recipe(recipe_ml)
     assert my_cookbook_xml.xpath("recipe/ingredient/li")[0].text == ingredient_text
+
+
+@pytest.mark.parametrize(
+    "ingredient_elements,ingredient_text",
+    [
+        (
+            (
+                E(
+                    "ing-div",
+                    E.note(
+                        "About ",
+                        E.amt(E.qty("500"), E.unit("grams")),
+                        " of ",
+                        E.temp(E.qty("20"), E.tempunit("degree C")),
+                        " butter",
+                    ),
+                    E.ing(E.amt(E.qty("2"), E.unit()), E.item("apples")),
+                    E.ing(E.amt(E.qty("3")), E.item("oranges")),
+                    E.ing(E.amt(E.qty("5"), E.unit("cups")), E.item("water")),
+                    E.note(E.time(E.qty("1"), E.timeunit("hour"))),
+                ),
+            ),
+            (
+                "Ingredient Group: ",
+                "About 500 grams of 20 degree C butter",
+                "2 apples",
+                "3 oranges",
+                "5 cups water",
+                "1 hour",
+            ),
+        ),
+        (
+            (
+                E(
+                    "ing-div",
+                    E.title("Summer"),
+                    E.description("When it's very hot"),
+                    E.note(
+                        "About ",
+                        E.amt(E.qty("500"), E.unit("grams")),
+                        " of ",
+                        E.temp(E.qty("20"), E.tempunit("degree C")),
+                        " butter",
+                    ),
+                    E.ing(E.amt(E.qty("2"), E.unit()), E.item("apples")),
+                    E.ing(E.amt(E.qty("3")), E.item("oranges")),
+                    E.ing(E.amt(E.qty("5"), E.unit("cups")), E.item("water")),
+                    E.note(E.time(E.qty("1"), E.timeunit("hour"))),
+                ),
+            ),
+            (
+                "Ingredient Group: Summer (When it's very hot)",
+                "About 500 grams of 20 degree C butter",
+                "2 apples",
+                "3 oranges",
+                "5 cups water",
+                "1 hour",
+            ),
+        ),
+        (
+            (
+                E(
+                    "ing-div",
+                    E.title("Summer"),
+                    E.description("When it's very hot"),
+                    E.note(
+                        "About ",
+                        E.amt(E.qty("500"), E.unit("grams")),
+                        " of ",
+                        E.temp(E.qty("20"), E.tempunit("degree C")),
+                        " butter",
+                    ),
+                    E.ing(E.amt(E.qty("2"), E.unit()), E.item("apples")),
+                    E.ing(E.amt(E.qty("3")), E.item("oranges")),
+                    E.ing(E.amt(E.qty("5"), E.unit("cups")), E.item("water")),
+                    E.note(E.time(E.qty("1"), E.timeunit("hour"))),
+                ),
+                E(
+                    "ing-div",
+                    E.title("Winter"),
+                    E.note(
+                        "About ",
+                        E.amt(E.qty("500"), E.unit("grams")),
+                        " of ",
+                        E.temp(E.qty("20"), E.tempunit("degree C")),
+                        " butter",
+                    ),
+                    E.ing(E.amt(E.qty("2"), E.unit()), E.item("apples")),
+                    E.ing(E.amt(E.qty("3")), E.item("oranges")),
+                    E.ing(E.amt(E.qty("5"), E.unit("cups")), E.item("water")),
+                    E.note(E.time(E.qty("1"), E.timeunit("hour"))),
+                ),
+            ),
+            (
+                "Ingredient Group: Summer (When it's very hot)",
+                "About 500 grams of 20 degree C butter",
+                "2 apples",
+                "3 oranges",
+                "5 cups water",
+                "1 hour",
+                "Ingredient Group: Winter",
+                "About 500 grams of 20 degree C butter",
+                "2 apples",
+                "3 oranges",
+                "5 cups water",
+                "1 hour",
+            ),
+        ),
+    ],
+)
+def test_multiple_ingredients_are_correct(
+    ingredient_elements: tuple[E, ...], ingredient_text: tuple[str]
+) -> None:
+    """Assert the ingredients have the right values when there is more than 1."""
+    recipe_ml = E.recipeml(E.recipe(E.ingredients(*ingredient_elements)))
+    my_cookbook_xml = convert_recipe(recipe_ml)
+    ingredients = my_cookbook_xml.xpath("recipe/ingredient/li")
+    assert len(ingredients) == len(ingredient_text)
+    for i in range(len(ingredient_text)):
+        assert ingredients[i].text == ingredient_text[i]

@@ -42,7 +42,7 @@
         <xsl:apply-templates select="preptime"/>
     </xsl:template>
 
-    <xsl:template match="title">
+    <xsl:template match="head/title">
         <title><xsl:apply-templates/></title>
     </xsl:template>
 
@@ -82,8 +82,23 @@
     <!-- ingredients -->
     <xsl:template match="ingredients">
         <ingredient>
-            <xsl:apply-templates select="note|ing"/>
+            <xsl:apply-templates select="ing-div|note|ing"/>
         </ingredient>
+    </xsl:template>
+
+    <xsl:template match="ing-div">
+        <li>
+            <xsl:text>Ingredient Group: </xsl:text>
+            <xsl:apply-templates select="title"/>
+            <xsl:if test="title and description">
+                <xsl:text> (</xsl:text>
+            </xsl:if>
+            <xsl:apply-templates select="description"/>
+            <xsl:if test="title and description">
+                <xsl:text>)</xsl:text>
+            </xsl:if>
+        </li>
+         <xsl:apply-templates select="note|ing"/>
     </xsl:template>
 
     <xsl:template match="ing">
@@ -117,7 +132,7 @@
     </xsl:template>
     <!-- end directions -->
 
-    <xsl:template match="amt|size|modifier|time|temp|prep|qty|brandname|span|mfr|product|q1|q2|ing-note" name="space-between-children">
+    <xsl:template match="amt|size|modifier|time|temp|prep|qty|brandname|span|mfr|product|q1|q2|ing-note|title|description" name="space-between-children">
         <xsl:for-each select="text()|*">
             <xsl:apply-templates select="."/>
             <xsl:if test=".//text() and ./following-sibling::*//text()">
