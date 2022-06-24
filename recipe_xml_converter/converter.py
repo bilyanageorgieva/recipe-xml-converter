@@ -8,7 +8,7 @@ from lxml import etree as ET
 logger = logging.getLogger(__name__)
 
 
-TRANSFORM_XSLT = Path(__file__).parent.parent / "data/recipe.xsl"
+TRANSFORM_XSLT = Path(__file__).parent.parent / "data/transform.xsl"
 """The path to the XSLT stylesheet used for the main transformation."""
 
 NORMALIZE_SPACE_XSLT = Path(__file__).parent.parent / "data/normalize_space.xsl"
