@@ -5,6 +5,8 @@ from typing import Union
 import click
 from lxml import etree as ET
 
+from recipe_xml_converter.helpers import setup_logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -49,6 +51,7 @@ def convert_and_save_recipe_to_file(recipe: str, target: str) -> None:
     :param recipe: the full path to the RecipeML file
     :param target: the full path where the transformed recipe should be saved
     """
+    setup_logging()
     try:
         logger.info(f"Transforming recipe {recipe}")
         transformed = convert_recipe_from_file(recipe)
@@ -61,9 +64,4 @@ def convert_and_save_recipe_to_file(recipe: str, target: str) -> None:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO,
-        datefmt="%H:%M:%S",
-        format="[%(asctime)s] %(name)s %(levelname)s: %(message)s",
-    )
     convert_and_save_recipe_to_file()
