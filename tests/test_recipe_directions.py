@@ -22,9 +22,9 @@ def test_steps_are_correct() -> None:
         assert cat == step_elements[i].text
 
 
-def test_two_blank_lines_split() -> None:
-    """Assert that two blank lines split a step into two and extra spaces are removed."""
-    recipe_ml = E.recipeml(E.recipe(E.directions(E.step(" Step 1\n\n Step 2 "))))
+def test_split_by_sentence() -> None:
+    """Assert that a single step is split into sentences."""
+    recipe_ml = E.recipeml(E.recipe(E.directions(E.step(" Step 1.\n\n Step 2 "))))
     my_cookbook_xml = convert_recipe(recipe_ml)
     step_elements = my_cookbook_xml.xpath("recipe/recipetext/li")
 

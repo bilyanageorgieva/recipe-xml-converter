@@ -118,17 +118,28 @@
     <!-- directions -->
     <xsl:template match="directions">
         <recipetext>
-            <xsl:apply-templates select="step"/>
+            <xsl:choose>
+                <xsl:when test="count(step)=1">
+                    <xsl:call-template name="split-steps"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:apply-templates select="step"/>
+                </xsl:otherwise>
+            </xsl:choose>
         </recipetext>
     </xsl:template>
 
-    <xsl:template match="step" name="split">
+    <xsl:template match="step">
+        <li><xsl:value-of select="normalize-space(.)"/></li>
+    </xsl:template>
+
+    <xsl:template name="split-steps">
         <!-- split the recipe steps by double empty lines -->
-        <xsl:param name="pText" select="."/>
+        <xsl:param name="pText" select="normalize-space(.)"/>
         <xsl:if test="$pText">
-            <li><xsl:value-of select="normalize-space(substring-before(concat($pText,'&#xa;&#xa;'),'&#xa;&#xa;'))"/></li>
-            <xsl:call-template name="split">
-                <xsl:with-param name="pText" select="substring-after($pText, '&#xa;&#xa;')"/>
+            <li><xsl:value-of select="normalize-space(substring-before(concat($pText,'. '),'. '))"/></li>
+            <xsl:call-template name="split-steps">
+                <xsl:with-param name="pText" select="substring-after($pText, '. ')"/>
             </xsl:call-template>
         </xsl:if>
     </xsl:template>
