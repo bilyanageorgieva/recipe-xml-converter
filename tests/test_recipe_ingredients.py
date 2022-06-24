@@ -245,7 +245,7 @@ def test_ingredient_is_correct(ingredient_element: E, ingredient_text: str) -> N
                 ),
             ),
             (
-                "Ingredient Group: ",
+                "Ingredient Group:",
                 "About 500 grams of 20 degree C butter",
                 "2 apples",
                 "3 oranges",

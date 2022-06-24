@@ -2,9 +2,17 @@ import logging
 from pathlib import Path
 from typing import Union
 
+import click
 from lxml import etree as ET
 
 logger = logging.getLogger(__name__)
+
+
+TRANSFORM_XSLT = Path(__file__).parent.parent / "data/recipe.xsl"
+"""The path to the XSLT stylesheet used for the main transformation."""
+
+NORMALIZE_SPACE_XSLT = Path(__file__).parent.parent / "data/normalize_space.xsl"
+"""The path to the XSLT stylesheet used for the removal of extra spaces."""
 
 
 def convert_recipe(dom: ET._ElementTree) -> ET._XSLTResultTree:
@@ -14,10 +22,9 @@ def convert_recipe(dom: ET._ElementTree) -> ET._XSLTResultTree:
     :param dom: the parsed RecipeML file represented as a DOM tree
     :return: the result from the transformation represented as a tree
     """
-    # TODO: fix types
-    xslt = ET.parse(Path(__file__).parent.parent / "data/recipe.xsl")
-    transform = ET.XSLT(xslt)
-    new_dom = transform(dom)
+    transform = ET.XSLT(ET.parse(TRANSFORM_XSLT))
+    normalize_space = ET.XSLT(ET.parse(NORMALIZE_SPACE_XSLT))
+    new_dom = normalize_space(transform(dom))
     return new_dom
 
 
@@ -32,26 +39,31 @@ def convert_recipe_from_file(path: Union[Path, str]) -> ET._XSLTResultTree:
     return convert_recipe(dom)
 
 
-def main() -> None:
-    """Grab the RecipeML recipe, transform it to MyCookbook XML, and store it on the file system."""
+@click.command
+@click.option("--recipe", help="Full path to the RecipeML file.")
+@click.option("--target", help="Full path where to save the transformed recipe.")
+def convert_and_save_recipe_to_file(recipe: str, target: str) -> None:
+    """
+    Convert a RecipeML file to a MyCookbook XML one and save it to the file system.
+
+    :param recipe: the full path to the RecipeML file
+    :param target: the full path where the transformed recipe should be saved
+    """
+    try:
+        logger.info(f"Transforming recipe {recipe}")
+        transformed = convert_recipe_from_file(recipe)
+    except:
+        logger.exception(f"Failed to transform recipe {recipe}")
+    else:
+        logger.info(f"✅ Recipe {recipe} transformed. Saving to file {target}")
+        with open(target, "wb") as file:
+            file.write(ET.tostring(transformed, pretty_print=True))
+
+
+if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
         datefmt="%H:%M:%S",
         format="[%(asctime)s] %(name)s %(levelname)s: %(message)s",
     )
-
-    recipe_path = Path(__file__).parent.parent / "data/'9os_Style_Chicken_Salad.xml"
-    try:
-        logger.info(f"Transforming recipe {recipe_path}")
-        recipe = convert_recipe_from_file(recipe_path)
-    except:
-        logger.exception(f"Failed to transform recipe {recipe_path}")
-    else:
-        target_path = Path(__file__).parent.parent / "data/tranformed.xml"
-        logger.info(f"✅ Recipe {recipe_path} transformed. Saving to file {target_path}")
-        with open(target_path, "wb") as file:
-            file.write(ET.tostring(recipe, pretty_print=True))
-
-
-if __name__ == "__main__":
-    main()
+    convert_and_save_recipe_to_file()
