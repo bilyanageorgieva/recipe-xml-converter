@@ -1,14 +1,15 @@
 import pytest
 from lxml.builder import E
 
-from recipe_xml_converter.converter import convert_recipe
+from recipe_xml_converter.transformer import RecipeTransformer
+from tests.fixtures import transformer
 
 
-def test_correct_number_of_ingredients() -> None:
+def test_correct_number_of_ingredients(transformer: RecipeTransformer) -> None:
     """Assert the correct number of ingredients have been created."""
     ing_num = 5
     recipe_ml = E.recipeml(E.recipe(E.ingredients(*[E.ing() for _ in range(ing_num)])))
-    my_cookbook_xml = convert_recipe(recipe_ml)
+    my_cookbook_xml = transformer._transform(recipe_ml)
     assert len(my_cookbook_xml.xpath("recipe/ingredient/li")) == ing_num
 
 
@@ -217,10 +218,12 @@ def test_correct_number_of_ingredients() -> None:
         ),
     ],
 )
-def test_ingredient_is_correct(ingredient_element: E, ingredient_text: str) -> None:
+def test_ingredient_is_correct(
+    transformer: RecipeTransformer, ingredient_element: E, ingredient_text: str
+) -> None:
     """Assert the ingredients have the right values."""
     recipe_ml = E.recipeml(E.recipe(E.ingredients(ingredient_element)))
-    my_cookbook_xml = convert_recipe(recipe_ml)
+    my_cookbook_xml = transformer._transform(recipe_ml)
     assert my_cookbook_xml.xpath("recipe/ingredient/li")[0].text == ingredient_text
 
 
@@ -333,11 +336,13 @@ def test_ingredient_is_correct(ingredient_element: E, ingredient_text: str) -> N
     ],
 )
 def test_multiple_ingredients_are_correct(
-    ingredient_elements: tuple[E, ...], ingredient_text: tuple[str]
+    transformer: RecipeTransformer,
+    ingredient_elements: tuple[E, ...],
+    ingredient_text: tuple[str],
 ) -> None:
     """Assert the ingredients have the right values when there is more than 1."""
     recipe_ml = E.recipeml(E.recipe(E.ingredients(*ingredient_elements)))
-    my_cookbook_xml = convert_recipe(recipe_ml)
+    my_cookbook_xml = transformer._transform(recipe_ml)
     ingredients = my_cookbook_xml.xpath("recipe/ingredient/li")
     assert len(ingredients) == len(ingredient_text)
     for i in range(len(ingredient_text)):

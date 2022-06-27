@@ -1,7 +1,8 @@
 import pytest
 from lxml.builder import E
 
-from recipe_xml_converter.converter import convert_recipe
+from recipe_xml_converter.transformer import RecipeTransformer
+from tests.fixtures import transformer
 
 
 @pytest.mark.parametrize(
@@ -15,10 +16,12 @@ from recipe_xml_converter.converter import convert_recipe
         "DC.Rights",
     ],
 )
-def test_source_meta_element_exists(element_name) -> None:
+def test_source_meta_element_exists(
+    transformer: RecipeTransformer, element_name
+) -> None:
     """Assert the meta element exists within the source tag."""
     recipe_ml = E.recipeml(E("meta", name=element_name, content=""))
-    my_cookbook_xml = convert_recipe(recipe_ml)
+    my_cookbook_xml = transformer._transform(recipe_ml)
     assert len(my_cookbook_xml.xpath("source/li")) == 1
 
 
@@ -33,17 +36,19 @@ def test_source_meta_element_exists(element_name) -> None:
         ("DC.Rights", "Copyright 1958"),
     ],
 )
-def test_source_meta_element_is_correct(element_name: str, element_value: str) -> None:
+def test_source_meta_element_is_correct(
+    transformer: RecipeTransformer, element_name: str, element_value: str
+) -> None:
     """Assert the meta element is correctly transformed within the source tag."""
     recipe_ml = E.recipeml(E("meta", name=element_name, content=element_value))
-    my_cookbook_xml = convert_recipe(recipe_ml)
+    my_cookbook_xml = transformer._transform(recipe_ml)
     assert (
         my_cookbook_xml.xpath("source/li")[0].text
         == f"{element_name[3:]}: {element_value}"
     )
 
 
-def test_source_meta_elements_exist_together() -> None:
+def test_source_meta_elements_exist_together(transformer: RecipeTransformer) -> None:
     """Assert that multiple source elements exist together within a single source element in the target doc."""
     meta_el = {
         "DC.Creator": "Creator Name",
@@ -56,12 +61,12 @@ def test_source_meta_elements_exist_together() -> None:
     recipe_ml = E.recipeml(
         *[E("meta", name=name, content=content) for name, content in meta_el.items()]
     )
-    my_cookbook_xml = convert_recipe(recipe_ml)
+    my_cookbook_xml = transformer._transform(recipe_ml)
     assert len(my_cookbook_xml.xpath("source")) == 1
     assert len(my_cookbook_xml.xpath("source/li")) == len(meta_el)
 
 
-def test_source_meta_elements_are_correct() -> None:
+def test_source_meta_elements_are_correct(transformer: RecipeTransformer) -> None:
     """Assert that when the creator and source elements are both present, their transformed values are correct."""
     meta_el = {
         "DC.Creator": "Creator Name",
@@ -74,7 +79,7 @@ def test_source_meta_elements_are_correct() -> None:
     recipe_ml = E.recipeml(
         *[E("meta", name=name, content=content) for name, content in meta_el.items()]
     )
-    my_cookbook_xml = convert_recipe(recipe_ml)
+    my_cookbook_xml = transformer._transform(recipe_ml)
     source_elements = my_cookbook_xml.xpath("source/li")
     assert len(source_elements) == len(meta_el)
 
