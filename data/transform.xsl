@@ -5,7 +5,7 @@
 
     <xsl:template match="/">
         <cookbook version="46">
-            <xsl:apply-templates select="recipeml/recipe"/>
+            <xsl:apply-templates select="recipeml//recipe"/>
             <xsl:call-template name="source"/>
         </cookbook>
     </xsl:template>
