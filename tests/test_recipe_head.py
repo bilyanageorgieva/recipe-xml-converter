@@ -2,7 +2,7 @@ import pytest
 from lxml.builder import E
 
 from recipe_xml_converter.transformer import RecipeTransformer
-from tests.fixtures import transformer
+from tests.fixtures import transformer  # noqa: F401
 
 
 @pytest.mark.parametrize(
@@ -177,7 +177,9 @@ def test_recipe_source_is_correct(
         ),
     ],
 )
-def test_prep_time(transformer: RecipeTransformer, element, destination, text) -> None:
+def test_prep_time(
+    transformer: RecipeTransformer, element: E, destination: str, text: str
+) -> None:
     """Assert the prep time is transformed correctly."""
     recipe_ml = E.recipeml(E.recipe(E.head(element)))
     my_cookbook_xml = transformer._transform(recipe_ml)

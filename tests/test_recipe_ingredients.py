@@ -2,7 +2,7 @@ import pytest
 from lxml.builder import E
 
 from recipe_xml_converter.transformer import RecipeTransformer
-from tests.fixtures import transformer
+from tests.fixtures import transformer  # noqa: F401
 
 
 def test_correct_number_of_ingredients(transformer: RecipeTransformer) -> None:

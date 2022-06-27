@@ -2,7 +2,7 @@ import pytest
 from lxml.builder import E
 
 from recipe_xml_converter.transformer import RecipeTransformer
-from tests.fixtures import transformer
+from tests.fixtures import transformer  # noqa: F401
 
 
 @pytest.mark.parametrize(
@@ -17,7 +17,10 @@ from tests.fixtures import transformer
         ),
     ],
 )
-def test_menu_is_parsed_correctly(transformer: RecipeTransformer, recipeml, mycookbook):
+def test_menu_is_parsed_correctly(
+    transformer: RecipeTransformer, recipeml: tuple[E, ...], mycookbook: tuple[E, ...]
+):
+    """Assert the menu element is parsed correctly."""
     dom = E.recipeml(E.menu(*recipeml))
     dom = transformer._transform(dom)
     recipe_elements = dom.xpath("recipe")

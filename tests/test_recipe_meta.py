@@ -2,7 +2,7 @@ import pytest
 from lxml.builder import E
 
 from recipe_xml_converter.transformer import RecipeTransformer
-from tests.fixtures import transformer
+from tests.fixtures import transformer  # noqa: F401
 
 
 @pytest.mark.parametrize(
@@ -17,7 +17,7 @@ from tests.fixtures import transformer
     ],
 )
 def test_source_meta_element_exists(
-    transformer: RecipeTransformer, element_name
+    transformer: RecipeTransformer, element_name: str
 ) -> None:
     """Assert the meta element exists within the source tag."""
     recipe_ml = E.recipeml(E("meta", name=element_name, content=""))
