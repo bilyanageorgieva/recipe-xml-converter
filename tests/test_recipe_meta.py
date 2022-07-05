@@ -20,9 +20,9 @@ def test_source_meta_element_exists(
     transformer: RecipeTransformer, element_name: str
 ) -> None:
     """Assert the meta element exists within the source tag."""
-    recipe_ml = E.recipeml(E("meta", name=element_name, content=""))
+    recipe_ml = E.recipeml(E("meta", name=element_name, content=""), E.recipe())
     my_cookbook_xml = transformer._transform(recipe_ml)
-    assert len(my_cookbook_xml.xpath("source/li")) == 1
+    assert len(my_cookbook_xml.xpath("recipe/source/li")) == 1
 
 
 @pytest.mark.parametrize(
@@ -40,10 +40,12 @@ def test_source_meta_element_is_correct(
     transformer: RecipeTransformer, element_name: str, element_value: str
 ) -> None:
     """Assert the meta element is correctly transformed within the source tag."""
-    recipe_ml = E.recipeml(E("meta", name=element_name, content=element_value))
+    recipe_ml = E.recipeml(
+        E("meta", name=element_name, content=element_value), E.recipe()
+    )
     my_cookbook_xml = transformer._transform(recipe_ml)
     assert (
-        my_cookbook_xml.xpath("source/li")[0].text
+        my_cookbook_xml.xpath("recipe/source/li")[0].text
         == f"{element_name[3:]}: {element_value}"
     )
 
@@ -59,11 +61,12 @@ def test_source_meta_elements_exist_together(transformer: RecipeTransformer) -> 
         "DC.Rights": "Copyright 1958",
     }
     recipe_ml = E.recipeml(
-        *[E("meta", name=name, content=content) for name, content in meta_el.items()]
+        *[E("meta", name=name, content=content) for name, content in meta_el.items()],
+        E.recipe(),
     )
     my_cookbook_xml = transformer._transform(recipe_ml)
-    assert len(my_cookbook_xml.xpath("source")) == 1
-    assert len(my_cookbook_xml.xpath("source/li")) == len(meta_el)
+    assert len(my_cookbook_xml.xpath("recipe/source")) == 1
+    assert len(my_cookbook_xml.xpath("recipe/source/li")) == len(meta_el)
 
 
 def test_source_meta_elements_are_correct(transformer: RecipeTransformer) -> None:
@@ -77,10 +80,11 @@ def test_source_meta_elements_are_correct(transformer: RecipeTransformer) -> Non
         "DC.Rights": "Copyright 1958",
     }
     recipe_ml = E.recipeml(
-        *[E("meta", name=name, content=content) for name, content in meta_el.items()]
+        *[E("meta", name=name, content=content) for name, content in meta_el.items()],
+        E.recipe(),
     )
     my_cookbook_xml = transformer._transform(recipe_ml)
-    source_elements = my_cookbook_xml.xpath("source/li")
+    source_elements = my_cookbook_xml.xpath("recipe/source/li")
     assert len(source_elements) == len(meta_el)
 
     for i, el in enumerate(meta_el.items()):

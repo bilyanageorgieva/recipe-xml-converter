@@ -6,15 +6,24 @@
     <xsl:template match="/">
         <cookbook version="46">
             <xsl:apply-templates select="recipeml//recipe"/>
-            <xsl:call-template name="source"/>
         </cookbook>
+    </xsl:template>
+
+    <!--  recipe  -->
+    <xsl:template match="recipe">
+        <recipe>
+            <xsl:apply-templates select="head"/>
+            <xsl:apply-templates select="ingredients"/>
+            <xsl:apply-templates select="directions"/>
+            <xsl:call-template name="source"/>
+        </recipe>
     </xsl:template>
 
     <!--  meta  -->
     <xsl:template name="source">
         <source>
-            <xsl:apply-templates select="recipeml/meta[contains('DC.Creator DC.Source DC.Identifier DC.Publisher DC.Date DC.Rights', @name)]"/>
-            <xsl:apply-templates select="recipeml/recipe/head/source"/>
+            <xsl:apply-templates select="../meta[contains('DC.Creator DC.Source DC.Identifier DC.Publisher DC.Date DC.Rights', @name)]"/>
+            <xsl:apply-templates select="head/source"/>
         </source>
     </xsl:template>
 
@@ -26,15 +35,6 @@
         </li>
     </xsl:template>
     <!--  end meta  -->
-
-    <!--  recipe  -->
-    <xsl:template match="recipe">
-        <recipe>
-            <xsl:apply-templates select="head"/>
-            <xsl:apply-templates select="ingredients"/>
-            <xsl:apply-templates select="directions"/>
-        </recipe>
-    </xsl:template>
 
     <!-- head -->
     <xsl:template match="head">

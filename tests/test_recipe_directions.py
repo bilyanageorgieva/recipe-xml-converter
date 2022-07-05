@@ -1,5 +1,4 @@
 from lxml.builder import E
-import pytest
 
 from recipe_xml_converter.transformer import RecipeTransformer
 from tests.fixtures import transformer  # noqa: F401
@@ -33,6 +32,7 @@ def test_split_by_sentence(transformer: RecipeTransformer) -> None:
     assert len(step_elements) == 2
     assert step_elements[0].text == "Step 1"
     assert step_elements[1].text == "Step 2"
+
 
 #
 # @pytest.mark.parametrize(

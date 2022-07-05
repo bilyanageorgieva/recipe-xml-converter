@@ -66,7 +66,7 @@ class RecipeTransformer(Transformer):
             input_file,
             output_file,
             xsl_files=(
-                Path(__file__).parent.parent / "data/transform.xsl",
-                Path(__file__).parent.parent / "data/normalize_space.xsl",
+                Path(__file__).parent.parent / "data/stylesheets/transform.xsl",
+                Path(__file__).parent.parent / "data/stylesheets/normalize_space.xsl",
             ),
         )

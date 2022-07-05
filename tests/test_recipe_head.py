@@ -1,4 +1,5 @@
 import pytest
+from lxml import etree as ET
 from lxml.builder import E
 
 from recipe_xml_converter.transformer import RecipeTransformer
@@ -113,7 +114,8 @@ def test_recipe_source_exists(transformer: RecipeTransformer) -> None:
     """Assert the recipe source element exists."""
     recipe_ml = E.recipeml(E.recipe(E.head(E.source())))
     my_cookbook_xml = transformer._transform(recipe_ml)
-    assert len(my_cookbook_xml.xpath("source/li")) == 1
+    print(ET.tostring(my_cookbook_xml, pretty_print=True))
+    assert len(my_cookbook_xml.xpath("recipe/source/li")) == 1
 
 
 @pytest.mark.parametrize(
@@ -138,8 +140,8 @@ def test_recipe_source_is_correct(
     """Assert the recipe source element has the correct value."""
     recipe_ml = E.recipeml(E.recipe(E.head(element)))
     my_cookbook_xml = transformer._transform(recipe_ml)
-    assert len(my_cookbook_xml.xpath("source/li")) == 1
-    assert my_cookbook_xml.xpath("source/li")[0].text == text
+    assert len(my_cookbook_xml.xpath("recipe/source/li")) == 1
+    assert my_cookbook_xml.xpath("recipe/source/li")[0].text == text
 
 
 @pytest.mark.parametrize(
