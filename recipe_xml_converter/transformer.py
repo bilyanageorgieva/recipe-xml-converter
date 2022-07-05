@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Union
 
 from lxml import etree as ET
 
@@ -32,18 +33,18 @@ class Transformer:
         dom = self._transform(dom)
 
         logger.info(f"Saving {self._input_file} to file")
-        self._save_to_file(dom)
+        self.save_to_file(dom, self._output_file)
 
-        logger.info(f"✅ Successfully saved {self._input_file} to {self._output_file}!")
+        logger.info(f"✅ Successfully saved {self._input_file} to {self._output_file}")
 
-    def _save_to_file(self, dom: ET._XSLTResultTree) -> None:
-        """
-        Save an XML tree to the desired location in the file system.
-
-        :param dom: the XML tree
-        """
-        with open(self._output_file, "wb") as file:
-            file.write(ET.tostring(dom, pretty_print=True))
+    @staticmethod
+    def save_to_file(dom: ET._XSLTResultTree, file_path: Union[str, Path]) -> None:
+        with open(file_path, "wb") as file:
+            file.write(
+                ET.tostring(
+                    dom, pretty_print=True, xml_declaration=True, encoding="UTF-8"
+                )
+            )
 
     def _transform(self, dom: ET._ElementTree) -> ET._XSLTResultTree:
         """
@@ -61,7 +62,7 @@ class RecipeTransformer(Transformer):
     """A transformer from RecipeML to My Cookbook XML."""
 
     def __init__(self, input_file: str, output_file: str):
-        """Initialize a new recipe transformer with the correct xsl files."""
+        """Initialize a new recipe transformer with the correct XSL files."""
         super(RecipeTransformer, self).__init__(
             input_file,
             output_file,
@@ -69,4 +70,16 @@ class RecipeTransformer(Transformer):
                 Path(__file__).parent.parent / "data/stylesheets/transform.xsl",
                 Path(__file__).parent.parent / "data/stylesheets/normalize_space.xsl",
             ),
+        )
+
+
+class CombinedTransformer(Transformer):
+    """Combines multiple XML files specified in a file."""
+
+    def __init__(self, input_file: str, output_file: str):
+        """Initialize a new combined transformer with the correct XSL files."""
+        super(CombinedTransformer, self).__init__(
+            input_file,
+            output_file,
+            xsl_files=(Path(__file__).parent.parent / "data/stylesheets/group.xsl",),
         )
