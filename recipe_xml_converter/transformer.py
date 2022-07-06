@@ -5,6 +5,8 @@ from typing import Union
 
 from lxml import etree as ET
 
+from recipe_xml_converter.exceptions import TransformerException
+
 logger = logging.getLogger(__name__)
 
 
@@ -33,16 +35,23 @@ class Transformer(abc.ABC):
 
     def transform_and_save(self) -> None:
         """Transform the input file and save the result to the output file."""
-        logger.info(f"Parsing {self._input_file}")
-        dom = ET.parse(self._input_file)
+        logger.debug(f"Parsing {self._input_file}")
+        dom = self._parse_input()
 
-        logger.info(f"Transforming {self._input_file}")
+        logger.debug(f"Transforming {self._input_file}")
         dom = self._transform(dom)
 
-        logger.info(f"Saving {self._input_file} to file")
+        logger.debug(f"Saving {self._input_file} to file")
         self.save_to_file(dom, self._output_file)
 
         logger.info(f"✅ Successfully saved {self._input_file} to {self._output_file}")
+
+    def _parse_input(self) -> ET._ElementTree:
+        """Parse the input file and return the ElementTree."""
+        try:
+            return ET.parse(self._input_file)
+        except ET.XMLSyntaxError as e:
+            raise TransformerException(f"Failed to parse {self._input_file}", e)
 
     @staticmethod
     def save_to_file(dom: ET._ElementTree, file_path: Union[str, Path]) -> None:
@@ -78,8 +87,8 @@ class RecipeTransformer(Transformer):
     def _xsl_files(self) -> tuple[Path, ...]:
         """Return the XSL files defining the recipe transformations."""
         return (
-            Path(__file__).parent.parent / "data/stylesheets/transform.xsl",
-            Path(__file__).parent.parent / "data/stylesheets/normalize_space.xsl",
+            Path(__file__).parent.parent / "stylesheets/transform.xsl",
+            Path(__file__).parent.parent / "stylesheets/normalize_space.xsl",
         )
 
 
@@ -89,4 +98,4 @@ class RecipeCombiner(Transformer):
     @property
     def _xsl_files(self) -> tuple[Path, ...]:
         """Return the XSL files defining the transformations for combining the recipes."""
-        return (Path(__file__).parent.parent / "data/stylesheets/group.xsl",)
+        return (Path(__file__).parent.parent / "stylesheets/group.xsl",)

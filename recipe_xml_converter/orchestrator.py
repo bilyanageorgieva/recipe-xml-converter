@@ -1,11 +1,14 @@
 import abc
 import logging
 import tempfile
+import uuid
 from pathlib import Path
-from typing import Type
+from typing import Optional, Type
 
 from lxml.builder import E
+from tqdm import tqdm
 
+from recipe_xml_converter.exceptions import TransformerException
 from recipe_xml_converter.transformer import (
     RecipeCombiner,
     RecipeTransformer,
@@ -62,9 +65,15 @@ class Orchestrator(abc.ABC):
         :param target_dir: the full path to the directory where to save the files
         :return: the full paths to all the created files
         """
-        return tuple(
-            [self._transform_file(file, target_dir) for file in self._file_paths]
+        all_files = [
+            self._transform_file(file, target_dir)
+            for file in tqdm(self._file_paths, desc="Files processed")
+        ]
+        successful_transformations = tuple([file for file in all_files if file])
+        logger.info(
+            f"Successfully transformed {len(successful_transformations)}/{len(all_files)} files."
         )
+        return successful_transformations
 
     def _combine_files(self, file_list: Path) -> None:
         """
@@ -74,7 +83,7 @@ class Orchestrator(abc.ABC):
         """
         self._combiner_class(file_list, self._output_path).transform_and_save()
 
-    def _transform_file(self, file: Path, target_dir: Path) -> Path:
+    def _transform_file(self, file: Path, target_dir: Path) -> Optional[Path]:
         """
         Transform one file and save it to the target directory.
 
@@ -82,9 +91,13 @@ class Orchestrator(abc.ABC):
         :param target_dir: the full path to the target directory to save the transformed file
         :return: the full path to the transformed file
         """
-        target_path = Path(target_dir) / file.name
-        self._transformer_class(file, target_path).transform_and_save()
-        return target_path
+        target_path = Path(target_dir) / f"{uuid.uuid4()}.xml"
+        try:
+            self._transformer_class(file, target_path).transform_and_save()
+            return target_path
+        except TransformerException:
+            logger.exception(f"❌ Failed to transform {file}")
+            return None
 
     @staticmethod
     def _generate_file_list(files: tuple[Path, ...], target_dir: Path) -> Path:
