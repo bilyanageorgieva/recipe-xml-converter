@@ -23,7 +23,7 @@ module = ["lxml.*", "tqdm.*"]
 ignore_missing_imports = true
 
 [tool.poetry.scripts]
-convert = "recipe_xml_converter.converter:convert_and_save_to_file"
+convert = "recipe_xml_converter.converter:transform_and_save"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

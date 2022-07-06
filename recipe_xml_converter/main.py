@@ -12,9 +12,7 @@ from recipe_xml_converter.orchestrator import RecipeOrchestrator
     help="The maximum number of files to combine together.",
     default=1000,
 )
-def convert_and_save_to_file(
-    recipes: str, target: str, max_files_combined: int
-) -> None:
+def transform_and_save(recipes: str, target: str, max_files_combined: int) -> None:
     """
     Convert a RecipeML file to a MyCookbook XML one and save it to the file system.
 
@@ -23,8 +21,8 @@ def convert_and_save_to_file(
     :param max_files_combined: the maximum number of files to combine together.
     """
     setup_logging()
-    RecipeOrchestrator(recipes, target, max_files_combined).transform()
+    RecipeOrchestrator(recipes, target, max_files_combined).orchestrate()
 
 
 if __name__ == "__main__":
-    convert_and_save_to_file()
+    transform_and_save()

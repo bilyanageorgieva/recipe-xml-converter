@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class Orchestrator(abc.ABC):
-    """General orchestrator for a complete workflow of transforming and combining multiple files."""
+    """General orchestrator for a complete workflow of transforming and combining multiple XML files."""
 
     def __init__(
         self, input_path: str, output_path: str, max_files_combined: int
@@ -56,12 +56,21 @@ class Orchestrator(abc.ABC):
         else:
             raise ValueError(f"Cannot locate input file(s) at {self._input_path}")
 
-    def transform(self) -> None:
-        """Transform all input files and combine them saving the result to the target location."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            all_files = self._transform_files(Path(temp_dir))
-            file_lists = self._generate_file_lists(all_files, Path(temp_dir))
+    def orchestrate(self) -> None:
+        """Orchestrate the transformation and combining of all input files saving the result to the target location."""
+        with tempfile.TemporaryDirectory() as work_dir:
+            transformed_files = self._transform_files(Path(work_dir))
+            logger.info(
+                f"Successfully transformed {len(transformed_files)}/{len(self._file_paths)} files."
+            )
+
+            file_lists = self._generate_file_lists(transformed_files, Path(work_dir))
+            logger.info(f"Generated {len(file_lists)} file lists.")
+
             self._combine_files(file_lists)
+            logger.info(
+                f"✅ Stored all {len(file_lists)} transformed files in {self._output_path}"
+            )
 
     def _transform_files(self, target_dir: Path) -> tuple[Path, ...]:
         """
@@ -74,11 +83,7 @@ class Orchestrator(abc.ABC):
             self._transform_file(file, target_dir)
             for file in tqdm(self._file_paths, desc="Files processed")
         ]
-        successful_transformations = tuple([file for file in all_files if file])
-        logger.info(
-            f"Successfully transformed {len(successful_transformations)}/{len(all_files)} files."
-        )
-        return successful_transformations
+        return tuple([file for file in all_files if file])
 
     def _combine_files(self, file_lists: tuple[Path, ...]) -> None:
         """
@@ -86,14 +91,10 @@ class Orchestrator(abc.ABC):
 
         :param file_lists: the full path to the XML listing all files to be combined
         """
-        self._output_path.mkdir()
-        _ = [
+        for i, file_list in enumerate(file_lists):
             self._combiner_class(
-                file_list, self._output_path / f"{i+1}.xml"
+                file_list, self._output_path / f"{i + 1}.xml"
             ).transform_and_save()
-            for i, file_list in enumerate(file_lists)
-        ]
-        logger.info(f"✅ Stored all {len(file_lists)} files in {self._output_path}")
 
     def _transform_file(self, file: Path, target_dir: Path) -> Optional[Path]:
         """

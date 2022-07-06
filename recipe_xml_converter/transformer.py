@@ -1,7 +1,6 @@
 import abc
 import logging
 from pathlib import Path
-from typing import Union
 
 from lxml import etree as ET
 
@@ -54,13 +53,15 @@ class Transformer(abc.ABC):
             raise TransformerException(f"Failed to parse {self._input_file}", e)
 
     @staticmethod
-    def save_to_file(dom: ET._ElementTree, file_path: Union[str, Path]) -> None:
+    def save_to_file(dom: ET._ElementTree, file_path: Path) -> None:
         """
         Save an XML dom to a file.
 
         :param dom: the XML dom representation to save
         :param file_path: the target path to save the XML
         """
+        file_path.parent.mkdir(parents=True, exist_ok=True)  # create the dir if missing
+
         with open(file_path, "wb") as file:
             file.write(
                 ET.tostring(
