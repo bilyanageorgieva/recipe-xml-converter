@@ -1,7 +1,7 @@
 import click
 
 from recipe_xml_converter.helpers import setup_logging
-from recipe_xml_converter.orchestrator import Orchestrator
+from recipe_xml_converter.orchestrator import RecipeOrchestrator
 
 
 @click.command
@@ -15,8 +15,7 @@ def convert_and_save_to_file(recipes: str, target: str) -> None:
     :param target: the full path where the transformed recipes should be saved
     """
     setup_logging()
-    orchestrator = Orchestrator(recipes, target)
-    orchestrator.transform()
+    RecipeOrchestrator(recipes, target).transform()
 
 
 if __name__ == "__main__":
