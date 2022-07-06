@@ -1,6 +1,7 @@
 import abc
 import logging
 import tempfile
+import time
 import uuid
 from pathlib import Path
 from typing import Optional, Type
@@ -21,15 +22,19 @@ logger = logging.getLogger(__name__)
 class Orchestrator(abc.ABC):
     """General orchestrator for a complete workflow of transforming and combining multiple files."""
 
-    def __init__(self, input_path: str, output_path: str) -> None:
+    def __init__(
+        self, input_path: str, output_path: str, max_files_combined: int
+    ) -> None:
         """
         Initialize a new orchestrator instance.
 
         :param input_path: the full path to the input file or folder
-        :param output_path: the full path to the target file where the transformation results should be saved
+        :param output_path: the full path to the target folder where the transformation results should be saved
+        :param max_files_combined: the maximum number of files to combine into one
         """
         self._input_path = Path(input_path)
-        self._output_path = Path(output_path)
+        self._output_path = Path(output_path) / f"{int(time.time())}_transformed"
+        self._max_files_combined = max_files_combined
 
     @property
     @abc.abstractmethod
@@ -52,11 +57,11 @@ class Orchestrator(abc.ABC):
             raise ValueError(f"Cannot locate input file(s) at {self._input_path}")
 
     def transform(self) -> None:
-        """Transform all input files and combine them to a single one saving it to the target location."""
+        """Transform all input files and combine them saving the result to the target location."""
         with tempfile.TemporaryDirectory() as temp_dir:
             all_files = self._transform_files(Path(temp_dir))
-            file_list = self._generate_file_list(all_files, Path(temp_dir))
-            self._combine_files(file_list)
+            file_lists = self._generate_file_lists(all_files, Path(temp_dir))
+            self._combine_files(file_lists)
 
     def _transform_files(self, target_dir: Path) -> tuple[Path, ...]:
         """
@@ -75,13 +80,20 @@ class Orchestrator(abc.ABC):
         )
         return successful_transformations
 
-    def _combine_files(self, file_list: Path) -> None:
+    def _combine_files(self, file_lists: tuple[Path, ...]) -> None:
         """
         Combine the files in the file list and save the result in the target location.
 
-        :param file_list: the full path to the XML listing all files to be combined
+        :param file_lists: the full path to the XML listing all files to be combined
         """
-        self._combiner_class(file_list, self._output_path).transform_and_save()
+        self._output_path.mkdir()
+        _ = [
+            self._combiner_class(
+                file_list, self._output_path / f"{i+1}.xml"
+            ).transform_and_save()
+            for i, file_list in enumerate(file_lists)
+        ]
+        logger.info(f"✅ Stored all {len(file_lists)} files in {self._output_path}")
 
     def _transform_file(self, file: Path, target_dir: Path) -> Optional[Path]:
         """
@@ -99,6 +111,26 @@ class Orchestrator(abc.ABC):
             logger.exception(f"❌ Failed to transform {file}")
             return None
 
+    def _generate_file_lists(
+        self, files: tuple[Path, ...], target_dir: Path
+    ) -> tuple[Path, ...]:
+        """
+        Generate and save XMLs listing all files to be combined respecting the maximum files allowed.
+
+        :param files: the full paths to the files to be included in the list
+        :param target_dir: the target directory to save the file list
+        :return: the full path to the file list
+        """
+        file_groups = [
+            files[i : i + self._max_files_combined]
+            for i in range(0, len(files), self._max_files_combined)
+        ]
+        file_lists = [
+            self._generate_file_list(group, target_dir)
+            for group in tqdm(file_groups, "Generated file groups")
+        ]
+        return tuple(file_lists)
+
     @staticmethod
     def _generate_file_list(files: tuple[Path, ...], target_dir: Path) -> Path:
         """
@@ -108,7 +140,7 @@ class Orchestrator(abc.ABC):
         :param target_dir: the target directory to save the file list
         :return: the full path to the file list
         """
-        target_path = Path(target_dir) / "list_files.xml"
+        target_path = Path(target_dir) / f"{uuid.uuid4()}.xml"
         dom = E.files(*[E.file(path=str(path)) for path in files])
         Transformer.save_to_file(dom, target_path)
         return target_path

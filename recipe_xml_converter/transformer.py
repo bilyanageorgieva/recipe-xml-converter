@@ -44,7 +44,7 @@ class Transformer(abc.ABC):
         logger.debug(f"Saving {self._input_file} to file")
         self.save_to_file(dom, self._output_file)
 
-        logger.info(f"✅ Successfully saved {self._input_file} to {self._output_file}")
+        logger.debug(f"✅ Successfully saved {self._input_file} to {self._output_file}")
 
     def _parse_input(self) -> ET._ElementTree:
         """Parse the input file and return the ElementTree."""
