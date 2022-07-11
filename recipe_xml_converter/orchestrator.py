@@ -106,7 +106,8 @@ class Orchestrator(abc.ABC):
         """
         target_path = Path(target_dir) / f"{uuid.uuid4()}.xml"
         try:
-            self._transformer_class(file, target_path).transform_and_save()
+            with open(file) as f:
+                self._transformer_class(f, target_path).transform_and_save()
             return target_path
         except TransformerException:
             logger.exception(f"❌ Failed to transform {file}")
