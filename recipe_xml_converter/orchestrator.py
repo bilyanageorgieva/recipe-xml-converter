@@ -4,7 +4,7 @@ import tempfile
 import time
 import uuid
 from pathlib import Path
-from typing import Optional, Type
+from typing import IO, Optional, Type, Union
 
 from lxml.builder import E
 from tqdm import tqdm
@@ -23,17 +23,20 @@ class Orchestrator(abc.ABC):
     """General orchestrator for a complete workflow of transforming and combining multiple XML files."""
 
     def __init__(
-        self, input_path: str, output_path: str, max_files_combined: int
+        self,
+        input_files: tuple[Union[Path, IO], ...],
+        output_path: Path,
+        max_files_combined: int = 1000,
     ) -> None:
         """
         Initialize a new orchestrator instance.
 
-        :param input_path: the full path to the input file or folder
+        :param input_files: the full path to the input file or folder
         :param output_path: the full path to the target folder where the transformation results should be saved
         :param max_files_combined: the maximum number of files to combine into one
         """
-        self._input_path = Path(input_path)
-        self._output_path = Path(output_path) / f"{int(time.time())}_transformed"
+        self._input_files = input_files
+        self._output_path = output_path / f"{int(time.time())}_transformed"
         self._max_files_combined = max_files_combined
 
     @property
@@ -46,22 +49,12 @@ class Orchestrator(abc.ABC):
     def _combiner_class(self) -> Type[Transformer]:
         """Return the transformer to use to combine the transformed files."""
 
-    @property
-    def _file_paths(self) -> tuple[Path, ...]:
-        """Return the paths to all files to be processed."""
-        if self._input_path.is_file():
-            return (self._input_path,)
-        elif self._input_path.is_dir():
-            return tuple(self._input_path.rglob("*.xml"))
-        else:
-            raise ValueError(f"Cannot locate input file(s) at {self._input_path}")
-
     def orchestrate(self) -> None:
         """Orchestrate the transformation and combining of all input files saving the result to the target location."""
         with tempfile.TemporaryDirectory() as work_dir:
             transformed_files = self._transform_files(Path(work_dir))
             logger.info(
-                f"Successfully transformed {len(transformed_files)}/{len(self._file_paths)} files."
+                f"Successfully transformed {len(transformed_files)}/{len(self._input_files)} files."
             )
 
             file_lists = self._generate_file_lists(transformed_files, Path(work_dir))
@@ -81,7 +74,7 @@ class Orchestrator(abc.ABC):
         """
         all_files = [
             self._transform_file(file, target_dir)
-            for file in tqdm(self._file_paths, desc="Files processed")
+            for file in tqdm(self._input_files, desc="Files processed")
         ]
         return tuple([file for file in all_files if file])
 
@@ -96,7 +89,9 @@ class Orchestrator(abc.ABC):
                 file_list, self._output_path / f"{i + 1}.xml"
             ).transform_and_save()
 
-    def _transform_file(self, file: Path, target_dir: Path) -> Optional[Path]:
+    def _transform_file(
+        self, file: Union[Path, IO], target_dir: Path
+    ) -> Optional[Path]:
         """
         Transform one file and save it to the target directory.
 
@@ -106,11 +101,10 @@ class Orchestrator(abc.ABC):
         """
         target_path = Path(target_dir) / f"{uuid.uuid4()}.xml"
         try:
-            with open(file) as f:
-                self._transformer_class(f, target_path).transform_and_save()
+            self._transformer_class(file, target_path).transform_and_save()
             return target_path
         except TransformerException:
-            logger.exception(f"❌ Failed to transform {file}")
+            logger.exception(f"❌ Failed to transform {file.name}")
             return None
 
     def _generate_file_lists(

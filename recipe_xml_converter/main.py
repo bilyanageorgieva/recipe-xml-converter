@@ -1,7 +1,11 @@
+from pathlib import Path
+
 import click
 
-from recipe_xml_converter.helpers import setup_logging
+from recipe_xml_converter.helpers import get_files_in_path, setup_logging
 from recipe_xml_converter.orchestrator import RecipeOrchestrator
+
+setup_logging()
 
 
 @click.command
@@ -20,8 +24,8 @@ def transform_and_save(recipes: str, target: str, max_files_combined: int) -> No
     :param target: the full path to the directory where the transformed recipes should be saved
     :param max_files_combined: the maximum number of files to combine together.
     """
-    setup_logging()
-    RecipeOrchestrator(recipes, target, max_files_combined).orchestrate()
+    recipe_paths = get_files_in_path(Path(recipes))
+    RecipeOrchestrator(recipe_paths, Path(target), max_files_combined).orchestrate()
 
 
 if __name__ == "__main__":

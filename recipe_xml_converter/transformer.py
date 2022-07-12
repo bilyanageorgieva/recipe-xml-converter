@@ -1,7 +1,7 @@
 import abc
 import logging
 from pathlib import Path
-from typing import IO
+from typing import IO, Union
 
 from lxml import etree as ET
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class Transformer(abc.ABC):
     """General transformer class."""
 
-    def __init__(self, input_file: IO, output_file: Path) -> None:
+    def __init__(self, input_file: Union[Path, IO], output_file: Path) -> None:
         """
         Create a new transformer instance.
 
@@ -41,10 +41,12 @@ class Transformer(abc.ABC):
         logger.debug(f"Transforming {self._input_file.name}")
         dom = self._transform(dom)
 
-        logger.debug(f"Saving {self._input_file} to file")
+        logger.debug(f"Saving {self._input_file.name} to file")
         self.save_to_file(dom, self._output_file)
 
-        logger.debug(f"✅ Successfully saved {self._input_file.name} to {self._output_file}")
+        logger.debug(
+            f"✅ Successfully saved {self._input_file.name} to {self._output_file}"
+        )
 
     def _parse_input(self) -> ET._ElementTree:
         """Parse the input file and return the ElementTree."""
