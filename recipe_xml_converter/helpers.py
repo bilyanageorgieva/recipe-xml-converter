@@ -12,6 +12,12 @@ def setup_logging() -> None:
 
 
 def get_files_in_path(path: Path) -> tuple[Path, ...]:
+    """
+    Return all the files contained in the path.
+
+    :param path: the path to traverse
+    :return: the paths to all files contained in the path
+    """
     if path.is_file():
         return (path,)
     elif path.is_dir():

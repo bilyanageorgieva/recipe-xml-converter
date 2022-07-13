@@ -3,6 +3,7 @@ import logging
 import tempfile
 import time
 import uuid
+import zipfile
 from pathlib import Path
 from typing import IO, Optional, Type, Union
 
@@ -25,18 +26,18 @@ class Orchestrator(abc.ABC):
     def __init__(
         self,
         input_files: tuple[Union[Path, IO], ...],
-        output_path: Path,
+        output_dir: Path,
         max_files_combined: int = 1000,
     ) -> None:
         """
         Initialize a new orchestrator instance.
 
-        :param input_files: the full path to the input file or folder
-        :param output_path: the full path to the target folder where the transformation results should be saved
+        :param input_files: the full paths to the input files to transform
+        :param output_dir: the full path to the target folder where the transformation results should be saved
         :param max_files_combined: the maximum number of files to combine into one
         """
         self._input_files = input_files
-        self._output_path = output_path / f"{int(time.time())}_transformed"
+        self._output_dir = output_dir
         self._max_files_combined = max_files_combined
 
     @property
@@ -49,8 +50,12 @@ class Orchestrator(abc.ABC):
     def _combiner_class(self) -> Type[Transformer]:
         """Return the transformer to use to combine the transformed files."""
 
-    def orchestrate(self) -> None:
-        """Orchestrate the transformation and combining of all input files saving the result to the target location."""
+    def orchestrate(self) -> Path:
+        """
+        Transform and combine all input files saving the result to the target location as a zip archive.
+
+        :return: the path to the zip archive
+        """
         with tempfile.TemporaryDirectory() as work_dir:
             transformed_files = self._transform_files(Path(work_dir))
             logger.info(
@@ -60,10 +65,25 @@ class Orchestrator(abc.ABC):
             file_lists = self._generate_file_lists(transformed_files, Path(work_dir))
             logger.info(f"Generated {len(file_lists)} file lists.")
 
-            self._combine_files(file_lists)
+            combined_files = self._combine_files(file_lists, Path(work_dir))
             logger.info(
-                f"✅ Stored all {len(file_lists)} transformed files in {self._output_path}"
+                f"Combined all {len(transformed_files)} transformed files into {len(combined_files)} files."
             )
+
+            return self.zip_files(combined_files)
+
+    def zip_files(self, file_paths: tuple[Path, ...]) -> Path:
+        """
+        Create a zip archive containing the XML files defined changing their names with consecutive numbers.
+
+        :param file_paths: the full paths to the files to include in the archive
+        :return: the full path to the archive
+        """
+        archive_path = self._output_dir / f"{int(time.time())}_transformed.zip"
+        with zipfile.ZipFile(archive_path, mode="w") as archive:
+            for i, file in enumerate(file_paths):
+                archive.write(file, f"{i+1}.xml")
+        return archive_path
 
     def _transform_files(self, target_dir: Path) -> tuple[Path, ...]:
         """
@@ -78,16 +98,20 @@ class Orchestrator(abc.ABC):
         ]
         return tuple([file for file in all_files if file])
 
-    def _combine_files(self, file_lists: tuple[Path, ...]) -> None:
+    def _combine_files(
+        self, file_lists: tuple[Path, ...], target_dir: Path
+    ) -> tuple[Path, ...]:
         """
-        Combine the files in the file list and save the result in the target location.
+        Combine the files in the file list and save the result in the target directory.
 
         :param file_lists: the full path to the XML listing all files to be combined
         """
-        for i, file_list in enumerate(file_lists):
-            self._combiner_class(
-                file_list, self._output_path / f"{i + 1}.xml"
-            ).transform_and_save()
+        combined_files = []
+        for file_list in file_lists:
+            target_path = target_dir / f"{uuid.uuid4()}.xml"
+            self._combiner_class(file_list, target_path).transform_and_save()
+            combined_files.append(target_path)
+        return tuple(combined_files)
 
     def _transform_file(
         self, file: Union[Path, IO], target_dir: Path
