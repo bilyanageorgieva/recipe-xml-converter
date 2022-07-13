@@ -10,6 +10,7 @@ from typing import IO, Optional, Type, Union
 from lxml.builder import E
 from tqdm import tqdm
 
+from recipe_xml_converter import config
 from recipe_xml_converter.exceptions import TransformerException
 from recipe_xml_converter.transformer import (
     RecipeCombiner,
@@ -56,7 +57,7 @@ class Orchestrator(abc.ABC):
 
         :return: the path to the zip archive
         """
-        with tempfile.TemporaryDirectory() as work_dir:
+        with tempfile.TemporaryDirectory(dir=config.BASE_DATA_DIR) as work_dir:
             transformed_files = self._transform_files(Path(work_dir))
             logger.info(
                 f"Successfully transformed {len(transformed_files)}/{len(self._input_files)} files."
