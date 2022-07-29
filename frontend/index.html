@@ -3,17 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <title>Recipe XML Converter</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://kit.fontawesome.com/f8a5a792c3.js" crossorigin="anonymous"></script>
 </head>
 <body>
-    <h1>Recipe XML Converter</h1>
-    <form id="convert-files-form">
-        <label for="files">RecipeML files: </label>
-        <input type="file" id="files" name="files" multiple>
-        <label for="max-files-combined">Max files combined: </label>
-        <input type="number" id="max-files-combined" name="max_combined_files" value="1000">
-        <input type="submit" value="Convert">
-    </form>
+    <div class="hero is-fullheight has-background-warning">
+        <div class="section has-text-centered hero is-danger">
+            <h1 class="title block pb-2">🧁 RecipeML to MyCookbook XML Converter 🍕</h1>
+            <p class="subtitle block">Upload your RecipeML files and download them as a single or multiple MyCookbook XML files.</p>
+        </div>
+        <div class="section">
+            <div class="has-text-centered block">
+                <p class="title">🍓🍋🥑🍓🍋🥑🍓🍋🥑🍓🍋🥑</p>
+            </div>
+            <form id="convert-files-form" class="box has-background-link is-mobile">
+                <div class="field is-horizontal">
+                    <label class="label field-label has-text-white" for="files">RecipeML files</label>
+                    <div class="field-body file has-name" id="file-with-js">
+                        <label class="file-label">
+                            <input class="file-input" type="file" id="files" name="files" multiple>
+                            <span class="file-cta">
+                                <span class="file-icon"><i class="fas fa-upload"></i></span>
+                                <span class="file-label">Choose files</span>
+                            </span>
+                            <span class="file-name has-background-white">No Files Selected</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <label class="label field-label has-text-white" for="max-files-combined">Number of files to combine</label>
+                    <div class="control field-body">
+                        <input class="input" type="number" id="max-files-combined" name="max_combined_files" value="1000">
+                    </div>
+                </div>
+
+                <div class="field is-horizontal">
+                    <div class="field-label"></div>
+                    <div class="control field-body">
+                        <input class="button" type="submit" value="Convert">
+                    </div>
+                </div>
+            </form>
+            <div class="has-text-centered block">
+                <p class="title">🌶🫒🍇🌶🫒🍇🌶🫒🍇🌶🫒🍇</p>
+            </div>
+        </div>
+        <footer class="footer level pb-6">
+            <div>
+                <p>
+                    Created by Bilyana Georgieva as her final project for her BSc Computer Science at <a href="https://www.gold.ac.uk/">Goldsmiths, University of London</a>
+                    <br> 2022
+                </p>
+            </div>
+            <div class="is-size-3">
+                <a href="https://github.com/bilyanageorgieva/recipe-xml-converter"><span class="icon has-text-black"><i class="fa-brands fa-github"></i></span></a>
+            </div>
+        </footer>
+    </div>
     <script src="js/main.js"></script>
 </body>
 </html>
