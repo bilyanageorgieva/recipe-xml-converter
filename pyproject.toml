@@ -27,7 +27,7 @@ module = ["lxml.*", "tqdm.*", "decouple.*"]
 ignore_missing_imports = true
 
 [tool.poetry.scripts]
-convert = "recipe_xml_converter.converter:transform_and_save"
+convert = "recipe_xml_converter.cli:transform_and_save"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

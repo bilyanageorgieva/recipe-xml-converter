@@ -1,10 +1,9 @@
 $("#convert-files-form").submit(function (event) {
     var formData = new FormData(this);
-
     $.ajax({
         type: "POST",
         enctype: "multipart/form-data",
-        url: "http://127.0.0.1:8000/api/transform/",
+        url: "/api/transform/",
         data: formData,
         processData: false,
         contentType: false,
