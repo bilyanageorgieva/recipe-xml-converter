@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "recipe-xml-converter"
+version = "0.1.0"
+description = "Converter from RecipeML to My Cookbook XML"
+authors = ["bilyanageorgieva <bibby.georgieva@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+lxml = "^4.9.0"
+click = "^8.1.3"
+tqdm = "^4.64.0"
+fastapi = "^0.78.0"
+uvicorn = "^0.18.2"
+python-multipart = "^0.0.5"
+python-decouple = "^3.6"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.1.2"
+black = "^22.3.0"
+isort = "^5.10.1"
+mypy = "^0.961"
+flake8 = "^4.0.1"
+flake8-docstrings = "^1.6.0"
+
+[[tool.mypy.overrides]]
+module = ["lxml.*", "tqdm.*", "decouple.*"]
+ignore_missing_imports = true
+
+[tool.poetry.scripts]
+convert = "recipe_xml_converter.cli:transform_and_save"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
