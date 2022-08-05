@@ -61,10 +61,6 @@
         <quantity><xsl:value-of select="."/></quantity>
     </xsl:template>
 
-    <xsl:template match="source|note">
-        <li><xsl:apply-templates/></li>
-    </xsl:template>
-
     <xsl:template match="preptime">
         <xsl:choose>
             <xsl:when test="@type='preparation'">
@@ -84,7 +80,7 @@
     <!-- ingredients -->
     <xsl:template match="ingredients">
         <ingredient>
-            <xsl:apply-templates select="ing-div|note|ing"/>
+            <xsl:apply-templates/>
         </ingredient>
     </xsl:template>
 
@@ -100,10 +96,10 @@
                 <xsl:text>)</xsl:text>
             </xsl:if>
         </li>
-         <xsl:apply-templates select="note|ing"/>
+        <xsl:apply-templates select="note|ing"/>
     </xsl:template>
 
-    <xsl:template match="ing">
+    <xsl:template match="ing|source|note|step">
         <li>
             <xsl:call-template name="space-between-children"/>
         </li>
@@ -118,42 +114,35 @@
     <!-- directions -->
     <xsl:template match="directions">
         <recipetext>
-            <xsl:choose>
-                <xsl:when test="count(step)=1">
-                    <xsl:call-template name="split-directions"/>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:apply-templates select="step"/>
-                </xsl:otherwise>
-            </xsl:choose>
+            <xsl:apply-templates/>
         </recipetext>
     </xsl:template>
 
-    <xsl:template match="step|substep">
-        <li><xsl:apply-templates/></li>
-    </xsl:template>
-
-    <xsl:template name="split-directions">
-        <!-- split the recipe steps by sentence -->
-        <xsl:param name="pText" select="normalize-space(.)"/>
-        <xsl:if test="$pText">
-            <li><xsl:value-of select="normalize-space(substring-before(concat($pText,'. '),'. '))"/></li>
-            <xsl:call-template name="split-directions">
-                <xsl:with-param name="pText" select="substring-after($pText, '. ')"/>
-            </xsl:call-template>
-        </xsl:if>
+    <xsl:template match="dir-div">
+        <li>
+            <xsl:text>Directions Group: </xsl:text>
+            <xsl:apply-templates select="title"/>
+            <xsl:if test="title and description">
+                <xsl:text> (</xsl:text>
+            </xsl:if>
+            <xsl:apply-templates select="description"/>
+            <xsl:if test="title and description">
+                <xsl:text>)</xsl:text>
+            </xsl:if>
+        </li>
+         <xsl:apply-templates select="note|ing|step"/>
     </xsl:template>
     <!-- end directions -->
 
     <!--  common formatting  -->
-    <xsl:template match="amt|size|modifier|time|temp|prep|qty|brandname|span|mfr|product|q1|q2|ing-note|title|description|action|condition|setting|toolref|ingref|steptime">
+    <xsl:template match="amt|size|modifier|time|temp|prep|qty|brandname|span|mfr|product|q1|q2|ing-note|title|description|action|condition|setting|toolref|ingref|steptime|tool|substep">
         <xsl:call-template name="space-between-children"/>
     </xsl:template>
 
     <xsl:template name="space-between-children">
         <xsl:for-each select="text()|*">
             <xsl:apply-templates select="."/>
-            <xsl:if test=".//text() and ./following-sibling::*//text()">
+            <xsl:if test=".//text() and .//following-sibling::*//text()[1]">
                 <xsl:text> </xsl:text>
             </xsl:if>
         </xsl:for-each>
