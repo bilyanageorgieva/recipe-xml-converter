@@ -58,7 +58,7 @@ def test_steps_are_correct(transformer: RecipeTransformer) -> None:
                 E.step(
                     E.substep(E.action("Make sure the butter is soft.")),
                     E.substep(E.condition("Stir it with the sugar.")),
-                    " Put some sprinkles."
+                    " Put some sprinkles.",
                 ),
             ),
             (
@@ -113,7 +113,10 @@ def test_steps_are_correct(transformer: RecipeTransformer) -> None:
         ),
     ],
 )
-def test_directions(transformer: RecipeTransformer, directions, transformed) -> None:
+def test_directions(
+    transformer: RecipeTransformer, directions: E, transformed: tuple[str, ...]
+) -> None:
+    """Assert the directions are transformed correctly."""
     recipe_ml = E.recipeml(E.recipe(directions))
     my_cookbook_xml = transformer._transform(recipe_ml)
     step_elements = my_cookbook_xml.xpath("recipe/recipetext/li")

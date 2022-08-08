@@ -71,9 +71,9 @@ class Orchestrator(abc.ABC):
                 f"Combined all {len(transformed_files)} transformed files into {len(combined_files)} files."
             )
 
-            return self.zip_files(combined_files)
+            return self._zip_files(combined_files)
 
-    def zip_files(self, file_paths: tuple[Path, ...]) -> Path:
+    def _zip_files(self, file_paths: tuple[Path, ...]) -> Path:
         """
         Create a zip archive containing the XML files defined changing their names with consecutive numbers.
 
