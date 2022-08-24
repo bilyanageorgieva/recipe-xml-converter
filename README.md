@@ -9,6 +9,15 @@
       - [CLI](#cli)
       - [REST API](#rest-api)
       - [Web](#web)
+  - [Development](#development)
+    - [Pull Requests](#pull-requests)
+    - [Code Style](#code-style)
+    - [Conventional commits](#conventional-commits)
+    - [Deployment](#deployment)
+      - [1. Update the dependencies](#1-update-the-dependencies)
+      - [2. Check the `runtime.txt` and `Procfile` files](#2-check-the-runtimetxt-and-procfile-files)
+      - [3. Push the application to the cloud](#3-push-the-application-to-the-cloud)
+
 ## Introduction
 This application converts [RecipeML](http://www.formatdata.com/recipeml/) files into 
 [MyCookbook XML](https://cookmate.blog/my-cookbook-xml-schema/) files and optionally combines multiple
@@ -81,3 +90,51 @@ uvicorn recipe_xml_converter.api:app --reload
 The application is deployed on the web with a simple frontend accessible [here](https://recipe-xml-converter.herokuapp.com/).
 Once you run the server as described above you can see the frontend by pointing your 
 browser to `localhost:8000`.
+
+## Development
+### Pull Requests
+For adding new features, fixing bugs, or any changes to the code whatsoever we use pull requests. The main branch is 
+protected so no one will be able to push to it directly. Should you want to make any changes, create a properly
+named branch based on the `main` branch, implement your changes there and open a pull request to merge the changes into
+`main`.
+
+### Code Style
+We use a few tools to make sure the code is readable and working. Make sure you pass all of the following checks before
+committing new code.
+
+```shell
+# Sort the imports
+isort .
+
+# Linting to prettify the code
+black .
+
+# Check type hints
+mypy .
+
+# Check docstrings and code style
+flake8 .
+```
+
+### Conventional commits
+We use conventional commit rules to write the commit messages. You can check these rules 
+[here](https://www.conventionalcommits.org/en/v1.0.0/).
+
+### Deployment
+To redeploy the application to Heroku there are two simple steps to follow. 
+
+#### 1. Update the dependencies
+If there were any changes to the project's dependencies made, you need to update them in the `requirements.txt` file
+as well. You can do it by running the following command
+```shell
+poetry export --without-hashes -f requirements.txt --output requirements.txt
+```
+
+#### 2. Check the `runtime.txt` and `Procfile` files
+Make sure the python version in `runtime.txt` is correct and so is the entrypoint in the `Procfile`.
+
+#### 3. Push the application to the cloud
+To update the online application run the following in the terminal
+```shell
+git push https://git.heroku.com/recipe-xml-converter.git main
+```
