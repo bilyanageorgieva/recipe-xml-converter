@@ -18,7 +18,7 @@ $("#convert-files-form").submit(function (event) {
             // create the download element
             var a = document.createElement("a")
             a.href = downloadUrl;
-            a.download = "zipped.zip";
+            a.download = "recipes.zip";
             document.body.appendChild(a);
             a.click();
 

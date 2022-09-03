@@ -1,5 +1,4 @@
 import logging
-import tempfile
 from pathlib import Path
 
 from recipe_xml_converter import config
@@ -16,10 +15,10 @@ def setup_logging() -> None:
 
 def get_files_in_path(path: Path) -> tuple[Path, ...]:
     """
-    Return all the files contained in the path.
+    Return all the XML files contained in the path.
 
     :param path: the path to traverse
-    :return: the paths to all files contained in the path
+    :return: the paths to all XML files contained in the path
     """
     if path.is_file():
         return (path,)
@@ -27,8 +26,3 @@ def get_files_in_path(path: Path) -> tuple[Path, ...]:
         return tuple(path.rglob("*.xml"))
     else:
         raise ValueError(f"Cannot locate input file(s) at {path}")
-
-
-def remove_temp_dir(temp_dir: tempfile.TemporaryDirectory) -> None:
-    """Cleanup the temporary directory."""
-    temp_dir.cleanup()

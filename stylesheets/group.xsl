@@ -4,7 +4,7 @@
     <xsl:output method="xml" version="1.0"/>
 
     <xsl:template match="/">
-        <cookbook>
+        <cookbook version="46">
             <xsl:for-each select="files/file">
                 <xsl:apply-templates select="document(@path)/cookbook"/>
             </xsl:for-each>

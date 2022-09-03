@@ -9,7 +9,7 @@ from starlette.background import BackgroundTasks
 from starlette.responses import FileResponse, RedirectResponse
 
 from recipe_xml_converter import config
-from recipe_xml_converter.helpers import remove_temp_dir, setup_logging
+from recipe_xml_converter.helpers import setup_logging
 from recipe_xml_converter.orchestrator import RecipeOrchestrator
 
 setup_logging()
@@ -53,7 +53,7 @@ async def transform_recipes(
     :return: a zip file containing all the transformed MyCookbook XML files
     """
     temp_dir = tempfile.TemporaryDirectory(dir=config.BASE_DATA_DIR)
-    background_tasks.add_task(remove_temp_dir, temp_dir)
+    background_tasks.add_task(lambda d: d.cleanup(), temp_dir)
 
     orchestrator = RecipeOrchestrator(
         tuple([f.file for f in files]), Path(temp_dir.name), max_combined_files
@@ -64,5 +64,10 @@ async def transform_recipes(
     )
 
 
-if __name__ == "__main__":
+def start_server() -> None:
+    """Start the uvicorn server."""
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+if __name__ == "__main__":
+    start_server()

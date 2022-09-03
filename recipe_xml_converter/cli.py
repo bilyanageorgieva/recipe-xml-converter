@@ -16,10 +16,10 @@ logger = logging.getLogger(__name__)
     "--recipes",
     "-r",
     multiple=True,
-    help="Full paths to the RecipeML files or folders.",
+    help="Full paths to the RecipeML files or folders that should be transformed.",
 )
 @click.option(
-    "--target", "-t", help="Full path to the directory to save the transformed recipes."
+    "--target", "-t", help="Full path to the directory to save the transformed files."
 )
 @click.option(
     "--max_files_combined",

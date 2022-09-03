@@ -1,3 +1,4 @@
+import pytest
 from lxml.builder import E
 
 from recipe_xml_converter.transformer import RecipeTransformer
@@ -23,43 +24,104 @@ def test_steps_are_correct(transformer: RecipeTransformer) -> None:
         assert cat == step_elements[i].text
 
 
-def test_split_by_sentence(transformer: RecipeTransformer) -> None:
-    """Assert that a single step is split into sentences."""
-    recipe_ml = E.recipeml(E.recipe(E.directions(E.step(" Step 1.\n\n Step 2 "))))
+@pytest.mark.parametrize(
+    "directions,transformed",
+    [
+        (
+            E.directions(
+                E.note(
+                    "About ",
+                    E.amt(E.qty("500"), E.unit("grams")),
+                    " of ",
+                    E.temp(E.qty("20"), E.tempunit("degree C")),
+                    " butter",
+                ),
+                E.step(
+                    E.action("Blend the butter with the sugar "),
+                    E.condition("only if melted"),
+                ),
+            ),
+            (
+                "About 500 grams of 20 degree C butter",
+                "Blend the butter with the sugar only if melted",
+            ),
+        ),
+        (
+            E.directions(
+                E.note(
+                    "About ",
+                    E.amt(E.qty("500"), E.unit("grams")),
+                    " of ",
+                    E.temp(E.qty("20"), E.tempunit("degree C")),
+                    " butter",
+                ),
+                E.step(
+                    E.substep(E.action("Make sure the butter is soft.")),
+                    E.substep(E.condition("Stir it with the sugar.")),
+                    " Put some sprinkles.",
+                ),
+            ),
+            (
+                "About 500 grams of 20 degree C butter",
+                "Make sure the butter is soft. Stir it with the sugar. Put some sprinkles.",
+            ),
+        ),
+        (
+            E.directions(
+                E(
+                    "dir-div",
+                    E.title("Preparing the dough"),
+                    E.description("24 hours in advance"),
+                    E.step(
+                        E.action("Make the dough and leave it."),
+                    ),
+                    E.step(
+                        E.action("Cover with a towel"),
+                        E.condition("if cold"),
+                    ),
+                ),
+                E(
+                    "dir-div",
+                    E.title("Something else"),
+                    E.step(E.action("Do another thing.")),
+                ),
+                E(
+                    "dir-div",
+                    E.description("One final thing."),
+                    E.step(
+                        "Use the ",
+                        E.tool(E.brandname("SomeBrand"), " airfryer"),
+                        " to cook the potatoes",
+                    ),
+                ),
+                E(
+                    "dir-div",
+                    E.step("This is only a step"),
+                ),
+            ),
+            (
+                "Directions Group: Preparing the dough (24 hours in advance)",
+                "Make the dough and leave it.",
+                "Cover with a towel if cold",
+                "Directions Group: Something else",
+                "Do another thing.",
+                "Directions Group: One final thing.",
+                "Use the SomeBrand airfryer to cook the potatoes",
+                "Directions Group:",
+                "This is only a step",
+            ),
+        ),
+    ],
+)
+def test_directions(
+    transformer: RecipeTransformer, directions: E, transformed: tuple[str, ...]
+) -> None:
+    """Assert the directions are transformed correctly."""
+    recipe_ml = E.recipeml(E.recipe(directions))
     my_cookbook_xml = transformer._transform(recipe_ml)
     step_elements = my_cookbook_xml.xpath("recipe/recipetext/li")
 
-    assert len(step_elements) == 2
-    assert step_elements[0].text == "Step 1"
-    assert step_elements[1].text == "Step 2"
-
-
-#
-# @pytest.mark.parametrize(
-#     "directions,transformed",
-#     [
-#         (
-#             E.directions(
-#                 E.note(
-#                     "About ",
-#                     E.amt(E.qty("500"), E.unit("grams")),
-#                     " of ",
-#                     E.temp(E.qty("20"), E.tempunit("degree C")),
-#                     " butter",
-#                 ),
-#                 E.step(),
-#             ),
-#             (
-#                 "About 500 grams of 20 degree C butter",
-#             )
-#         ),
-#     ]
-# )
-# def test_directions(transformer: RecipeTransformer, directions, transformed) -> None:
-#     recipe_ml = E.recipeml(E.recipe(directions))
-#     my_cookbook_xml = transformer._transform(recipe_ml)
-#     step_elements = my_cookbook_xml.xpath("recipe/recipetext/li")
-#
-#     assert len(step_elements) == len(transformed)
-#     for i in range(step_elements):
-#         assert step_elements[i].text == transformed[i]
+    print([e.text for e in step_elements])
+    assert len(step_elements) == len(transformed)
+    for i in range(len(step_elements)):
+        assert step_elements[i].text == transformed[i]
